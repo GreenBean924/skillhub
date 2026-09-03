@@ -4,7 +4,9 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    OPENAI_API_KEY: str = ""
+    LLM_API_KEY: str = ""
+    LLM_API_BASE: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    LLM_MODEL: str = "qwen-plus"
     CORS_ORIGINS: str = "http://localhost:3000"
     ENVIRONMENT: str = "development"
 
