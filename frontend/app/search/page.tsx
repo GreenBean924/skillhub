@@ -1,4 +1,5 @@
-import { searchSkills } from "@/data/mock";
+import { searchSkillsAPI } from "@/lib/api";
+import type { Skill } from "@/data/mock";
 import { SearchBar } from "@/components/SearchBar";
 import { SkillCard } from "@/components/SkillCard";
 
@@ -9,21 +10,21 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q : "";
-  const results = query ? searchSkills(query) : [];
 
-  const parsedCapabilities = query
-    ? results.flatMap((r) =>
-        r.capabilities.filter((c) =>
-          c.toLowerCase().includes(query.toLowerCase())
-        )
-      )
-    : [];
+  let skills: Skill[] = [];
+  let parsedTags: string[] = [];
+  let parsedCapabilities: string[] = [];
 
-  const parsedTags = query
-    ? results.flatMap((r) =>
-        r.tags.filter((t) => t.toLowerCase().includes(query.toLowerCase()))
-      )
-    : [];
+  if (query) {
+    try {
+      const res = await searchSkillsAPI(query);
+      skills = res.data;
+      parsedTags = res.query_understanding?.tags ?? [];
+      parsedCapabilities = res.query_understanding?.capabilities ?? [];
+    } catch {
+      // API unavailable, show empty results
+    }
+  }
 
   return (
     <div className="min-h-screen p-8">
@@ -78,14 +79,14 @@ export default async function SearchPage({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-mono text-sm font-semibold text-foreground">
-                  找到 {results.length} 个结果 &quot;
+                  找到 {skills.length} 个结果 &quot;
                   <span className="text-neon-cyan">{query}</span>&quot;
                 </h2>
               </div>
 
-              {results.length > 0 ? (
+              {skills.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {results.map((skill) => (
+                  {skills.map((skill) => (
                     <SkillCard key={skill.slug} skill={skill} />
                   ))}
                 </div>

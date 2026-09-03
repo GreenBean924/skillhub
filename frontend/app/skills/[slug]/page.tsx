@@ -1,4 +1,4 @@
-import { getSkillBySlug } from "@/data/mock";
+import { getSkillBySlugAPI } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { SecurityReport } from "@/components/SecurityReport";
 import { InstallGuide } from "@/components/InstallGuide";
@@ -10,9 +10,11 @@ export default async function SkillDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const skill = getSkillBySlug(slug);
 
-  if (!skill) {
+  let skill;
+  try {
+    skill = await getSkillBySlugAPI(slug);
+  } catch {
     notFound();
   }
 

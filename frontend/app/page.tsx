@@ -1,14 +1,18 @@
-import { mockSkills, popularTags } from "@/data/mock";
+import { getSkills, getTags } from "@/lib/api";
 import { SearchBar } from "@/components/SearchBar";
 import { SkillCard } from "@/components/SkillCard";
 import { TagChip } from "@/components/TagChip";
 
-export default function Home() {
-  const recommended = [...mockSkills]
+export default async function Home() {
+  const [skillsRes, tags] = await Promise.all([getSkills(1, 50), getTags()]);
+  const allSkills = skillsRes.data;
+  const popularTags = tags.slice(0, 10).map((t) => t.name);
+
+  const recommended = [...allSkills]
     .sort((a, b) => b.stars - a.stars)
     .slice(0, 6);
 
-  const latest = [...mockSkills]
+  const latest = [...allSkills]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 5);
 
@@ -43,7 +47,7 @@ export default function Home() {
               推荐技能
             </h2>
             <span className="text-xs font-mono text-muted">
-              共 {mockSkills.length} 个技能
+              共 {allSkills.length} 个技能
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

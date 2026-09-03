@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { mockSkills } from "@/data/mock";
+import { useEffect, useState } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 const navLinks = [
   { href: "/", label: "首页", icon: HomeIcon },
@@ -13,9 +15,20 @@ const navLinks = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const totalSkills = mockSkills.length;
-  const safeSkills = mockSkills.filter((s) => s.security.level === "safe").length;
-  const totalDownloads = mockSkills.reduce((sum, s) => sum + s.downloads, 0);
+  const [stats, setStats] = useState({ totalSkills: 0, safeSkills: 0, totalDownloads: 0 });
+
+  useEffect(() => {
+    fetch(`${API_BASE}/stats`)
+      .then((res) => res.json())
+      .then((data) =>
+        setStats({
+          totalSkills: data.total_skills,
+          safeSkills: data.safe_skills,
+          totalDownloads: data.total_downloads,
+        })
+      )
+      .catch(() => {});
+  }, []);
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-surface border-r border-border flex flex-col z-50">
@@ -61,18 +74,18 @@ export function Sidebar() {
       <div className="p-4 border-t border-border space-y-3">
         <div className="flex justify-between text-xs font-mono">
           <span className="text-muted">技能数</span>
-          <span className="text-neon-cyan">{totalSkills}</span>
+          <span className="text-neon-cyan">{stats.totalSkills}</span>
         </div>
         <div className="flex justify-between text-xs font-mono">
           <span className="text-muted">已验证</span>
-          <span className="text-neon-green">{safeSkills}</span>
+          <span className="text-neon-green">{stats.safeSkills}</span>
         </div>
         <div className="flex justify-between text-xs font-mono">
           <span className="text-muted">下载量</span>
           <span className="text-foreground">
-            {totalDownloads >= 1000
-              ? `${(totalDownloads / 1000).toFixed(1)}k`
-              : totalDownloads}
+            {stats.totalDownloads >= 1000
+              ? `${(stats.totalDownloads / 1000).toFixed(1)}k`
+              : stats.totalDownloads}
           </span>
         </div>
         <div className="pt-2 text-[10px] font-mono text-muted/50 text-center">
