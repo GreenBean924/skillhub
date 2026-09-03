@@ -39,7 +39,7 @@ export const mockSkills: Skill[] = [
     name: "Web Scraper Pro",
     author: "cyberdev",
     description:
-      "Advanced web scraping skill with anti-detection, proxy rotation, and structured data extraction. Supports dynamic JS-rendered pages.",
+      "高级网页爬虫技能，支持反检测、代理轮换和结构化数据提取。可处理动态 JS 渲染页面。",
     tags: ["scraping", "data-extraction", "automation", "puppeteer"],
     capabilities: ["network_access", "file_write", "process_exec"],
     security: {
@@ -49,31 +49,31 @@ export const mockSkills: Skill[] = [
         {
           id: "f1",
           severity: "high",
-          title: "Unrestricted network access",
+          title: "无限制的网络访问",
           description:
-            "The skill can make arbitrary HTTP requests to any domain without allowlist restrictions.",
+            "该技能可以向任意域名发送 HTTP 请求，没有白名单限制。",
           evidence: `fetch(url, { method: "POST", body: data })`,
           recommendation:
-            "Add a domain allowlist configuration to limit outbound requests to trusted endpoints.",
+            "添加域名白名单配置，限制出站请求只能访问可信端点。",
         },
         {
           id: "f2",
           severity: "medium",
-          title: "File system write without path restriction",
+          title: "文件系统写入无路径限制",
           description:
-            "Extracted data is written to disk without validating the output path, which could allow path traversal.",
+            "提取的数据直接写入磁盘，未验证输出路径，可能存在路径遍历风险。",
           evidence: `fs.writeFileSync(outputPath, JSON.stringify(data))`,
           recommendation:
-            "Validate and sanitize output paths. Restrict writes to a designated output directory.",
+            "验证并清理输出路径，限制写入到指定的输出目录。",
         },
         {
           id: "f3",
           severity: "low",
-          title: "Verbose error logging",
+          title: "详细的错误日志",
           description:
-            "Error messages may include URLs, headers, or partial response bodies that could contain sensitive data.",
+            "错误信息可能包含 URL、请求头或部分响应体，这些内容可能包含敏感数据。",
           recommendation:
-            "Redact sensitive fields from error logs before outputting.",
+            "在输出前从错误日志中脱敏敏感字段。",
         },
       ],
       scannedAt: "2026-08-28T10:30:00Z",
@@ -107,7 +107,7 @@ module.exports = { scrape };`,
     name: "Code Reviewer AI",
     author: "devtools-lab",
     description:
-      "Automated code review skill that analyzes PRs for bugs, security vulnerabilities, performance issues, and style consistency.",
+      "自动化代码审查技能，可分析 PR 中的 bug、安全漏洞、性能问题和代码风格一致性。",
     tags: ["code-review", "security", "quality", "AI"],
     capabilities: ["file_read", "llm_call"],
     security: {
@@ -117,11 +117,11 @@ module.exports = { scrape };`,
         {
           id: "f4",
           severity: "info",
-          title: "LLM API calls for analysis",
+          title: "使用 LLM API 进行分析",
           description:
-            "This skill sends code snippets to an LLM API for review. Code content is transmitted over TLS.",
+            "该技能将代码片段发送到 LLM API 进行审查。代码内容通过 TLS 加密传输。",
           recommendation:
-            "Document data transmission in user-facing docs. Consider local model option for sensitive repos.",
+            "在用户文档中说明数据传输方式。对于敏感仓库，可考虑使用本地模型。",
         },
       ],
       scannedAt: "2026-08-30T09:15:00Z",
@@ -159,7 +159,7 @@ module.exports = { reviewCode };`,
     name: "Database Migrator",
     author: "datacraft",
     description:
-      "Safe database migration skill with rollback support, dry-run mode, and schema diff visualization. Supports PostgreSQL and MySQL.",
+      "安全的数据库迁移技能，支持回滚、dry-run 模式和 schema diff 可视化。支持 PostgreSQL 和 MySQL。",
     tags: ["database", "migration", "postgresql", "mysql"],
     capabilities: ["network_access", "process_exec", "file_read", "file_write"],
     security: {
@@ -169,21 +169,21 @@ module.exports = { reviewCode };`,
         {
           id: "f5",
           severity: "medium",
-          title: "Database credentials via environment variables",
+          title: "通过环境变量传递数据库凭证",
           description:
-            "Credentials are read from env vars. While standard practice, they could leak through error messages or logs.",
+            "凭证从环境变量读取。虽然是标准做法，但可能通过错误信息或日志泄露。",
           evidence: `const connStr = process.env.DATABASE_URL;`,
           recommendation:
-            "Ensure credentials are never included in error messages. Use a secrets manager for production.",
+            "确保凭证不会包含在错误信息中。生产环境建议使用密钥管理服务。",
         },
         {
           id: "f6",
           severity: "low",
-          title: "SQL execution with dynamic queries",
+          title: "动态查询执行 SQL",
           description:
-            "Migration scripts execute SQL directly. The skill does validate migration file integrity via checksums.",
+            "迁移脚本直接执行 SQL。该技能通过校验和验证迁移文件完整性。",
           recommendation:
-            "Continue using checksums. Consider adding a statement allowlist for extra safety.",
+            "继续使用校验和机制。可考虑添加语句白名单以增强安全性。",
         },
       ],
       scannedAt: "2026-08-29T11:00:00Z",
@@ -224,7 +224,7 @@ module.exports = { migrate };`,
     name: "Prompt Optimizer",
     author: "ai-tools",
     description:
-      "Analyze and optimize LLM prompts for better output quality. Includes token counting, structure suggestions, and few-shot example generation.",
+      "分析和优化 LLM 提示词，提升输出质量。包含 token 计数、结构建议和 few-shot 示例生成。",
     tags: ["LLM", "prompt-engineering", "optimization", "NLP"],
     capabilities: ["llm_call", "file_read"],
     security: {
@@ -234,11 +234,11 @@ module.exports = { migrate };`,
         {
           id: "f7",
           severity: "info",
-          title: "Prompt content sent for analysis",
+          title: "提示词内容发送进行分析",
           description:
-            "User prompts are sent to an LLM for optimization suggestions. No side effects or system access required.",
+            "用户提示词被发送到 LLM 进行优化建议。无副作用或系统访问需求。",
           recommendation:
-            "No action needed. Document that prompt content is transmitted for analysis.",
+            "无需操作。在文档中说明提示词内容会被传输用于分析。",
         },
       ],
       scannedAt: "2026-08-31T08:00:00Z",
@@ -273,7 +273,7 @@ module.exports = { optimize };`,
     name: "System Monitor",
     author: "ops-guru",
     description:
-      "Real-time system monitoring skill. Tracks CPU, memory, disk, and network usage with alerting thresholds and historical trending.",
+      "实时系统监控技能。跟踪 CPU、内存、磁盘和网络使用情况，支持告警阈值和历史趋势分析。",
     tags: ["monitoring", "devops", "system", "alerts"],
     capabilities: ["process_exec", "network_access", "file_write"],
     security: {
@@ -283,30 +283,30 @@ module.exports = { optimize };`,
         {
           id: "f8",
           severity: "high",
-          title: "Shell command execution for system metrics",
+          title: "通过 shell 命令获取系统指标",
           description:
-            "The skill executes system commands (top, df, netstat) to gather metrics. Command injection is possible if parameters are not sanitized.",
+            "该技能执行系统命令（top、df、netstat）收集指标。如果参数未清理，可能存在命令注入风险。",
           evidence: `execSync(\`top -bn1 | grep \${processName}\`)`,
           recommendation:
-            "Use allowlisted commands with no user-controlled interpolation. Prefer native OS APIs over shell commands.",
+            "使用白名单命令，禁止用户控制插值。优先使用原生 OS API 而非 shell 命令。",
         },
         {
           id: "f9",
           severity: "medium",
-          title: "Outbound webhook for alerts",
+          title: "告警 webhook 外发",
           description:
-            "Alert webhooks send system metrics to external URLs. The URL is user-configured but not validated.",
+            "告警 webhook 将系统指标发送到外部 URL。URL 由用户配置但未经验证。",
           recommendation:
-            "Validate webhook URLs against an allowlist of known alerting services.",
+            "针对已知告警服务的 URL 白名单进行验证。",
         },
         {
           id: "f10",
           severity: "low",
-          title: "Metrics stored in local files",
+          title: "指标存储在本地文件",
           description:
-            "Historical metrics are written to JSON files in the skill's data directory.",
+            "历史指标以 JSON 文件形式写入技能的数据目录。",
           recommendation:
-            "Ensure data directory has appropriate permissions. Consider log rotation.",
+            "确保数据目录具有适当的权限。考虑日志轮转机制。",
         },
       ],
       scannedAt: "2026-08-27T14:20:00Z",
@@ -346,7 +346,7 @@ module.exports = { getCpuUsage, getMemoryUsage, checkThresholds };`,
     name: "Git Workflow Helper",
     author: "devtools-lab",
     description:
-      "Automate common git workflows: feature branches, PR creation, rebasing, conflict resolution suggestions, and changelog generation.",
+      "自动化常见 git 工作流：功能分支、PR 创建、rebase、冲突解决建议和 changelog 生成。",
     tags: ["git", "workflow", "automation", "CLI"],
     capabilities: ["process_exec", "file_read", "file_write"],
     security: {
@@ -356,21 +356,21 @@ module.exports = { getCpuUsage, getMemoryUsage, checkThresholds };`,
         {
           id: "f11",
           severity: "medium",
-          title: "Git command execution",
+          title: "Git 命令执行",
           description:
-            "Executes git commands via child_process. Branch names and commit messages are interpolated into commands.",
+            "通过 child_process 执行 git 命令。分支名和提交信息被插值到命令中。",
           evidence: `execSync(\`git checkout -b \${branchName}\`)`,
           recommendation:
-            "Validate branch names against git ref naming rules. Escape all interpolated values.",
+            "根据 git ref 命名规则验证分支名。对所有插值值进行转义。",
         },
         {
           id: "f12",
           severity: "low",
-          title: "Changelog written to repository",
+          title: "Changelog 写入仓库",
           description:
-            "Generated changelogs are written directly to the repo. No overwrite protection for existing files.",
+            "生成的 changelog 直接写入仓库。对现有文件没有覆盖保护。",
           recommendation:
-            "Add a flag to control overwrite behavior. Back up existing changelog before writing.",
+            "添加标志控制覆盖行为。写入前备份现有 changelog。",
         },
       ],
       scannedAt: "2026-08-30T16:00:00Z",
@@ -403,7 +403,7 @@ module.exports = { createFeatureBranch, generateChangelog };`,
     name: "API Fuzzer",
     author: "sec-research",
     description:
-      "Automated API fuzzing skill that generates edge-case inputs, tests error handling, and reports potential vulnerabilities in REST APIs.",
+      "自动化 API 模糊测试技能，生成边界输入、测试错误处理，并报告 REST API 中的潜在漏洞。",
     tags: ["security", "testing", "API", "fuzzing"],
     capabilities: ["network_access", "process_exec", "file_write"],
     security: {
@@ -413,40 +413,40 @@ module.exports = { createFeatureBranch, generateChangelog };`,
         {
           id: "f13",
           severity: "critical",
-          title: "Arbitrary HTTP request construction",
+          title: "任意 HTTP 请求构造",
           description:
-            "The skill constructs and sends arbitrary HTTP requests including malformed payloads. Without proper scoping, it could target unintended services.",
+            "该技能构造并发送任意 HTTP 请求，包括畸形负载。如果没有适当的作用域限制，可能会 targeting 非预期服务。",
           evidence: `axios.request({ method, url: targetUrl, data: payload })`,
           recommendation:
-            "Require explicit target URL allowlist. Add confirmation before scanning non-local endpoints.",
+            "要求显式的目标 URL 白名单。扫描非本地端点前需用户确认。",
         },
         {
           id: "f14",
           severity: "high",
-          title: "Process execution for report generation",
+          title: "报告生成时的进程执行",
           description:
-            "External tools (e.g., jq, python) are invoked for report formatting. Command arguments include user-provided data.",
+            "调用外部工具（如 jq、python）进行报告格式化。命令参数包含用户提供的数据。",
           evidence: `execSync(\`python report_gen.py --input \${outputFile}\`)`,
           recommendation:
-            "Avoid shell execution. Use native Node.js for report generation or validate all inputs strictly.",
+            "避免 shell 执行。使用原生 Node.js 进行报告生成，或严格验证所有输入。",
         },
         {
           id: "f15",
           severity: "high",
-          title: "No rate limiting on fuzz requests",
+          title: "模糊测试请求无速率限制",
           description:
-            "Fuzz requests are sent without rate limiting, which could overwhelm target services or trigger abuse detection.",
+            "模糊测试请求发送时没有速率限制，可能会压垮目标服务或触发滥用检测。",
           recommendation:
-            "Add configurable rate limiting and request delays. Default to conservative rates.",
+            "添加可配置的速率限制和请求延迟。默认使用保守的速率。",
         },
         {
           id: "f16",
           severity: "medium",
-          title: "Sensitive data in fuzz results",
+          title: "模糊测试结果中的敏感数据",
           description:
-            "Fuzz results may include response bodies containing sensitive server information.",
+            "模糊测试结果可能包含响应体中的敏感服务器信息。",
           recommendation:
-            "Redact response bodies in reports. Only include relevant error messages and status codes.",
+            "在报告中脱敏响应体。仅包含相关错误信息和状态码。",
         },
       ],
       scannedAt: "2026-08-26T09:00:00Z",
@@ -489,7 +489,7 @@ module.exports = { fuzzEndpoint };`,
     name: "Markdown Translator",
     author: "i18n-tools",
     description:
-      "Translate markdown documents while preserving formatting, links, images, and code blocks. Supports 30+ languages with glossary customization.",
+      "翻译 markdown 文档，同时保留格式、链接、图片和代码块。支持 30+ 种语言，可自定义术语表。",
     tags: ["i18n", "translation", "markdown", "LLM"],
     capabilities: ["file_read", "file_write", "llm_call"],
     security: {
@@ -499,11 +499,11 @@ module.exports = { fuzzEndpoint };`,
         {
           id: "f17",
           severity: "info",
-          title: "File content sent for translation",
+          title: "文件内容发送用于翻译",
           description:
-            "Markdown content is sent to an LLM for translation. Code blocks are excluded from translation by default.",
+            "Markdown 内容被发送到 LLM 进行翻译。默认情况下代码块不参与翻译。",
           recommendation:
-            "No action needed. Document that file content is transmitted for translation.",
+            "无需操作。在文档中说明文件内容会被传输用于翻译。",
         },
       ],
       scannedAt: "2026-09-01T07:30:00Z",
@@ -537,7 +537,7 @@ module.exports = { translate };`,
     name: "Env Secrets Scanner",
     author: "sec-research",
     description:
-      "Scan codebases for accidentally committed secrets, API keys, tokens, and credentials. Supports custom patterns and CI integration.",
+      "扫描代码库中意外提交的密钥、API key、token 和凭证。支持自定义模式和 CI 集成。",
     tags: ["security", "secrets", "scanning", "CI"],
     capabilities: ["file_read", "process_exec"],
     security: {
@@ -547,21 +547,21 @@ module.exports = { translate };`,
         {
           id: "f18",
           severity: "medium",
-          title: "Reads all files in scan directory",
+          title: "读取扫描目录中的所有文件",
           description:
-            "The scanner reads all files recursively. Binary files and large assets are skipped by extension, but other sensitive files may be read into memory.",
+            "扫描器递归读取所有文件。二进制文件和大资源文件按扩展名跳过，但其他敏感文件可能被读入内存。",
           recommendation:
-            "Add a configurable ignore list. Skip files above a size threshold.",
+            "添加可配置的忽略列表。跳过超过大小阈值的文件。",
         },
         {
           id: "f19",
           severity: "low",
-          title: "Pattern matching via regex",
+          title: "通过正则表达式进行模式匹配",
           description:
-            "Secret detection uses regex patterns. Custom patterns are user-provided and compiled without sandboxing.",
+            "密钥检测使用正则表达式模式。自定义模式由用户提供，编译时没有沙箱保护。",
           evidence: `const re = new RegExp(userPattern);`,
           recommendation:
-            "Validate custom regex patterns for catastrophic backtracking. Add a timeout for pattern matching.",
+            "验证自定义正则表达式是否存在灾难性回溯。为模式匹配添加超时机制。",
         },
       ],
       scannedAt: "2026-08-31T13:00:00Z",
@@ -601,7 +601,7 @@ module.exports = { scanFile, DEFAULT_PATTERNS };`,
     name: "Docker Compose Generator",
     author: "ops-guru",
     description:
-      "Analyze your project structure and generate optimized docker-compose.yml files with health checks, networking, and volume management.",
+      "分析项目结构并生成优化的 docker-compose.yml 文件，包含健康检查、网络配置和卷管理。",
     tags: ["docker", "devops", "automation", "infrastructure"],
     capabilities: ["file_read", "file_write", "process_exec"],
     security: {
@@ -611,21 +611,21 @@ module.exports = { scanFile, DEFAULT_PATTERNS };`,
         {
           id: "f20",
           severity: "medium",
-          title: "Project structure detection via shell commands",
+          title: "通过 shell 命令检测项目结构",
           description:
-            "Uses find and grep commands to detect project type. File paths are not fully sanitized.",
+            "使用 find 和 grep 命令检测项目类型。文件路径未完全清理。",
           evidence: `execSync(\`find \${projectDir} -name 'package.json' -maxdepth 2\`)`,
           recommendation:
-            "Use Node.js fs APIs instead of shell commands for file detection. Validate projectDir is within expected bounds.",
+            "使用 Node.js fs API 代替 shell 命令进行文件检测。验证 projectDir 在预期范围内。",
         },
         {
           id: "f21",
           severity: "low",
-          title: "Generated compose file includes default ports",
+          title: "生成的 compose 文件包含默认端口",
           description:
-            "Default port mappings could conflict with existing services on the host machine.",
+            "默认端口映射可能与主机上现有服务冲突。",
           recommendation:
-            "Check for port availability before generating. Allow port override via config.",
+            "生成前检查端口可用性。允许通过配置覆盖端口。",
         },
       ],
       scannedAt: "2026-08-29T10:45:00Z",

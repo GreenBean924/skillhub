@@ -1,69 +1,115 @@
-import Image from "next/image";
+import { mockSkills, popularTags } from "@/data/mock";
+import { SearchBar } from "@/components/SearchBar";
+import { SkillCard } from "@/components/SkillCard";
+import { TagChip } from "@/components/TagChip";
 
 export default function Home() {
+  const recommended = [...mockSkills]
+    .sort((a, b) => b.stars - a.stars)
+    .slice(0, 6);
+
+  const latest = [...mockSkills]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 5);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen p-8">
+      <div className="max-w-5xl mx-auto space-y-12">
+        {/* Hero / Search */}
+        <section className="pt-12 pb-4 space-y-6">
+          <div className="space-y-2">
+            <h1 className="font-mono text-3xl font-bold text-foreground tracking-tight">
+              发现{" "}
+              <span className="text-neon-cyan text-glow-cyan">Agent Skills</span>
+            </h1>
+            <p className="text-sm text-muted font-mono max-w-lg">
+              搜索、审查和安装 AI Agent 技能。所有技能均经过安全扫描和验证。
+            </p>
+          </div>
+          <SearchBar large />
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-mono text-muted mr-1">热门标签:</span>
+            {popularTags.slice(0, 8).map((tag) => (
+              <TagChip key={tag} tag={tag} />
+            ))}
+          </div>
+        </section>
+
+        {/* Recommended Skills */}
+        <section className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="font-mono text-lg font-semibold text-foreground flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />
+              推荐技能
+            </h2>
+            <span className="text-xs font-mono text-muted">
+              共 {mockSkills.length} 个技能
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recommended.map((skill) => (
+              <SkillCard key={skill.slug} skill={skill} />
+            ))}
+          </div>
+        </section>
+
+        {/* Latest Updates */}
+        <section className="space-y-5 pb-12">
+          <h2 className="font-mono text-lg font-semibold text-foreground flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-neon-magenta" />
+            最近更新
+          </h2>
+          <div className="space-y-2">
+            {latest.map((skill) => (
+              <a
+                key={skill.slug}
+                href={`/skills/${skill.slug}`}
+                className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-border hover:border-neon-cyan/30 transition-all group"
+              >
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-mono text-sm font-semibold text-foreground group-hover:text-neon-cyan transition-colors truncate">
+                    {skill.name}
+                  </h3>
+                  <p className="text-xs text-muted mt-0.5 truncate">
+                    {skill.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      skill.security.level === "safe"
+                        ? "bg-neon-green"
+                        : skill.security.level === "low"
+                          ? "bg-neon-cyan"
+                          : skill.security.level === "medium"
+                            ? "bg-neon-orange"
+                            : "bg-neon-red"
+                    }`}
+                  />
+                  <span className="text-xs font-mono text-muted">
+                    {new Date(skill.updatedAt).toLocaleDateString()}
+                  </span>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    className="text-muted group-hover:text-neon-cyan transition-colors"
+                  >
+                    <path
+                      d="M5 3L9 7L5 11"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
