@@ -62,7 +62,7 @@ class StatsResponse(BaseModel):
     total_skills: int
     safe_skills: int
     total_downloads: int
-    last_updated: str
+    last_updated: str | None = None
 
 
 class QueryUnderstandingResponse(BaseModel):
