@@ -60,6 +60,17 @@ async def understand_query(query: str) -> QueryUnderstanding:
         return _fallback_understanding(query)
 
 
+def _trigger_matches(keyword: str, triggers: list[str]) -> bool:
+    for trigger in triggers:
+        if len(trigger) <= 3:
+            if keyword == trigger:
+                return True
+        else:
+            if trigger in keyword or keyword.startswith(trigger):
+                return True
+    return False
+
+
 def _fallback_understanding(query: str) -> QueryUnderstanding:
     words = query.lower().split()
     stop_words = {"the", "a", "an", "is", "are", "for", "to", "how", "do", "i", "can", "what", "which", "with"}
@@ -86,7 +97,7 @@ def _fallback_understanding(query: str) -> QueryUnderstanding:
     }
     for tag, triggers in tag_map.items():
         for kw in keywords:
-            if any(trigger in kw for trigger in triggers):
+            if _trigger_matches(kw, triggers):
                 tag_hints.append(tag)
                 break
 
@@ -101,7 +112,7 @@ def _fallback_understanding(query: str) -> QueryUnderstanding:
     }
     for cap, triggers in cap_map.items():
         for kw in keywords:
-            if any(trigger in kw for trigger in triggers):
+            if _trigger_matches(kw, triggers):
                 cap_hints.append(cap)
                 break
 

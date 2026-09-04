@@ -15,7 +15,7 @@ class EmbeddingClient:
             base_url=settings.LLM_API_BASE,
         )
         self._model = getattr(settings, "EMBEDDING_MODEL", "text-embedding-v3")
-        self._dimensions = getattr(settings, "EMBEDDING_DIMENSIONS", 1536)
+        self._dimensions = getattr(settings, "EMBEDDING_DIMENSIONS", 1024)
 
     async def embed_text(self, text: str) -> list[float] | None:
         if not text or not text.strip():

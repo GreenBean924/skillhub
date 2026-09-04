@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import or_, select, func, text
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.skill import Skill
@@ -17,8 +17,9 @@ async def hybrid_search(
     page: int = 1,
     page_size: int = 20,
 ) -> tuple[list[dict], int]:
+    enhanced_query = _build_enhanced_query(query, query_understanding)
     keyword_results = await _keyword_search(db, query, query_understanding, page, page_size * 2)
-    semantic_results = await _semantic_search(db, query, page, page_size * 2)
+    semantic_results = await _semantic_search(db, enhanced_query, page, page_size * 2)
 
     merged: dict[str, dict] = {}
     for item in keyword_results:
@@ -42,7 +43,11 @@ async def hybrid_search(
     for item in merged.values():
         kw = item.get("keyword_score", 0) / max_score
         sem = item.get("semantic_score", 0) / max_score
-        item["relevance_score"] = max(kw, sem) if (kw > 0 and sem > 0) else max(kw, sem) * 0.8
+        base_relevance = max(kw, sem)
+        if kw > 0 and sem > 0:
+            item["relevance_score"] = min(1.0, base_relevance * 1.15)
+        else:
+            item["relevance_score"] = base_relevance
 
     sorted_results = sorted(merged.values(), key=lambda x: x["relevance_score"], reverse=True)
     total = len(sorted_results)
@@ -63,12 +68,13 @@ async def _keyword_search(
     conditions = [
         Skill.name.ilike(search_pattern),
         Skill.description.ilike(search_pattern),
+        Skill.content.ilike(search_pattern),
     ]
 
     for tag in qu.tags[:3]:
-        conditions.append(Skill.tags.any(text(f"'{tag}'")))
+        conditions.append(Skill.tags.any(tag))
     for cap in qu.capabilities[:3]:
-        conditions.append(Skill.capabilities.any(text(f"'{cap}'")))
+        conditions.append(Skill.capabilities.any(cap))
 
     q = select(Skill).where(or_(*conditions)).limit(limit)
     result = await db.execute(q)
@@ -84,16 +90,31 @@ async def _keyword_search(
 def _compute_keyword_score(skill: Skill, query: str, qu: QueryUnderstanding) -> float:
     score = 0.0
     q_lower = query.lower()
+    name_lower = skill.name.lower()
+    desc_lower = skill.description.lower()
+    content_lower = (skill.content or "").lower()
 
-    if q_lower in skill.name.lower():
+    if q_lower in name_lower:
         score += 3.0
-    elif any(w in skill.name.lower() for w in q_lower.split() if len(w) > 2):
+    elif any(w in name_lower for w in q_lower.split() if len(w) > 2):
         score += 1.5
 
-    if q_lower in skill.description.lower():
+    if q_lower in desc_lower:
         score += 2.0
-    elif any(w in skill.description.lower() for w in q_lower.split() if len(w) > 2):
+    elif any(w in desc_lower for w in q_lower.split() if len(w) > 2):
         score += 1.0
+
+    if q_lower in content_lower:
+        score += 1.0
+    elif any(w in content_lower for w in q_lower.split() if len(w) > 2):
+        score += 0.5
+
+    for kw in qu.keywords[:3]:
+        kw_lower = kw.lower()
+        if kw_lower in name_lower:
+            score += 1.0
+        elif kw_lower in desc_lower:
+            score += 0.5
 
     skill_tags_lower = [t.lower() for t in (skill.tags or [])]
     for tag in qu.tags:
@@ -106,6 +127,15 @@ def _compute_keyword_score(skill: Skill, query: str, qu: QueryUnderstanding) -> 
             score += 1.0
 
     return score
+
+
+def _build_enhanced_query(query: str, qu: QueryUnderstanding) -> str:
+    parts = [query]
+    if qu.tags:
+        parts.extend(qu.tags[:3])
+    if qu.intent and qu.intent != "find_skill":
+        parts.append(qu.intent)
+    return " ".join(parts)
 
 
 async def _semantic_search(
