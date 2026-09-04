@@ -2,11 +2,19 @@ import { getSkills, getTags, getRecommendations } from "@/lib/api";
 import { SearchBar } from "@/components/SearchBar";
 import { SkillCard } from "@/components/SkillCard";
 import { TagChip } from "@/components/TagChip";
+import type { Skill } from "@/data/mock";
 
 export default async function Home() {
-  const [skillsRes, tags] = await Promise.all([getSkills(1, 50), getTags()]);
-  const allSkills = skillsRes.data;
-  const popularTags = tags.slice(0, 10).map((t) => t.name);
+  let allSkills: Skill[] = [];
+  let popularTags: string[] = [];
+
+  try {
+    const [skillsRes, tags] = await Promise.all([getSkills(1, 50), getTags()]);
+    allSkills = skillsRes.data;
+    popularTags = tags.slice(0, 10).map((t) => t.name);
+  } catch {
+    // backend unreachable — page renders empty state below
+  }
 
   let recommended = allSkills
     .sort((a, b) => b.stars - a.stars)
