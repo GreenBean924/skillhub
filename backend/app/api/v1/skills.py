@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -126,7 +127,12 @@ async def install_skill(slug: str, db: AsyncSession = Depends(get_db)):
 
     log = InstallLog(skill_id=skill.id, source="api")
     db.add(log)
-    skill.install_count = (skill.install_count or 0) + 1
+    await db.execute(
+        update(Skill)
+        .where(Skill.id == skill.id)
+        .values(install_count=Skill.install_count + 1)
+        .execution_options(synchronize_session=False)
+    )
     await db.commit()
 
     return InstallResponse(
