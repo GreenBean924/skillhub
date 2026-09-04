@@ -1,6 +1,5 @@
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.models.skill import Skill
 
@@ -33,41 +32,6 @@ async def get_skill_by_slug(db: AsyncSession, slug: str) -> Skill | None:
     query = select(Skill).where(Skill.slug == slug)
     result = await db.execute(query)
     return result.scalar_one_or_none()
-
-
-async def search_skills(
-    db: AsyncSession,
-    query: str,
-    page: int = 1,
-    page_size: int = 20,
-) -> tuple[list[Skill], int]:
-    search_pattern = f"%{query}%"
-
-    count_query = select(func.count(Skill.id)).where(
-        (Skill.name.ilike(search_pattern))
-        | (Skill.description.ilike(search_pattern))
-        | (Skill.tags.any(text(f"'{query}'")))
-        | (Skill.capabilities.any(text(f"'{query}'")))
-    )
-    count_result = await db.execute(count_query)
-    total = count_result.scalar() or 0
-
-    skill_query = (
-        select(Skill)
-        .where(
-            (Skill.name.ilike(search_pattern))
-            | (Skill.description.ilike(search_pattern))
-            | (Skill.tags.any(text(f"'{query}'")))
-            | (Skill.capabilities.any(text(f"'{query}'")))
-        )
-        .order_by(Skill.stars.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )
-    result = await db.execute(skill_query)
-    skills = result.scalars().all()
-
-    return list(skills), total
 
 
 async def get_tags(db: AsyncSession) -> list[dict[str, int]]:
