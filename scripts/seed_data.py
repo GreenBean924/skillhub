@@ -1047,6 +1047,1609 @@ setInterval(syncToCloud, 300000);
 
 module.exports = { backup: syncToCloud };""",
     },
+    # ── Frontend Development ──────────────────────────────────────────
+    {
+        "slug": "react-component-gen",
+        "name": "React Component Generator",
+        "author": "frontend-wizard",
+        "description": "根据描述自动生成 React 函数式组件，包含 TypeScript 类型、Props 接口、单元测试和 Storybook 故事。",
+        "tags": ["react", "frontend", "component", "typescript"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 94,
+        "security_report": {"level": "safe", "score": 94, "findings": [], "scannedAt": "2026-09-02T08:00:00Z"},
+        "install_command": "skillhub install react-component-gen",
+        "downloads": 24500,
+        "stars": 782,
+        "content": """// React Component Generator
+const { callLLM } = require('./llm');
+const fs = require('fs');
+const path = require('path');
+
+async function generateComponent(name, description, options = {}) {
+  const prompt = `Generate a React functional component:
+Name: ${name}
+Description: ${description}
+Options: ${JSON.stringify(options)}`;
+
+  const result = await callLLM(prompt);
+  const componentCode = result.component;
+  const testCode = result.test;
+  const storyCode = result.story;
+
+  const dir = path.join(options.outputDir || 'src/components', name);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, `${name}.tsx`), componentCode);
+  fs.writeFileSync(path.join(dir, `${name}.test.tsx`), testCode);
+  if (options.storybook) {
+    fs.writeFileSync(path.join(dir, `${name}.stories.tsx`), storyCode);
+  }
+  return { path: dir, files: [`${name}.tsx`, `${name}.test.tsx`] };
+}
+
+module.exports = { generateComponent };""",
+    },
+    {
+        "slug": "vue-composable-builder",
+        "name": "Vue Composable Builder",
+        "author": "vue-master",
+        "description": "创建可复用的 Vue 3 Composition API composable，自动处理响应式状态、生命周期管理和 TypeScript 类型推断。",
+        "tags": ["vue", "frontend", "composable", "typescript"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 92,
+        "security_report": {"level": "safe", "score": 92, "findings": [], "scannedAt": "2026-09-02T09:00:00Z"},
+        "install_command": "skillhub install vue-composable-builder",
+        "downloads": 11800,
+        "stars": 356,
+        "content": """// Vue Composable Builder
+const { callLLM } = require('./llm');
+
+async function buildComposable(name, logic, options = {}) {
+  const prompt = `Create a Vue 3 composable:
+Name: use${name}
+Logic: ${logic}
+Features: ${JSON.stringify(options.features || ['reactive', 'lifecycle'])}`;
+
+  const result = await callLLM(prompt);
+  return {
+    code: result.code,
+    types: result.types,
+    testExample: result.test,
+  };
+}
+
+function wrapReactive(stateFactory) {
+  const { ref, computed, onMounted, onUnmounted } = require('vue');
+  return function useWrapped() {
+    const state = ref(stateFactory());
+    onMounted(() => state.value.init?.());
+    onUnmounted(() => state.value.destroy?.());
+    return { state };
+  };
+}
+
+module.exports = { buildComposable, wrapReactive };""",
+    },
+    {
+        "slug": "css-design-system",
+        "name": "CSS Design System Generator",
+        "author": "style-guru",
+        "description": "从设计稿或描述生成一致的设计系统，包括 CSS 变量、组件样式、间距和排版规范。",
+        "tags": ["css", "design-system", "frontend", "tailwind"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 96,
+        "security_report": {"level": "safe", "score": 96, "findings": [], "scannedAt": "2026-09-02T10:00:00Z"},
+        "install_command": "skillhub install css-design-system",
+        "downloads": 8900,
+        "stars": 271,
+        "content": """// CSS Design System Generator
+const { callLLM } = require('./llm');
+const fs = require('fs');
+
+async function generateDesignSystem(config) {
+  const tokens = {
+    colors: config.colors || generatePalette(config.brandColor),
+    spacing: generateSpacingScale(config.baseUnit || 4),
+    typography: generateTypeScale(config.fontFamily, config.baseSize || 16),
+    breakpoints: { sm: 640, md: 768, lg: 1024, xl: 1280 },
+  };
+
+  const cssVars = Object.entries(tokens).flatMap(([group, values]) =>
+    Object.entries(values).map(([key, val]) => `  --${group}-${key}: ${val};`)
+  ).join('\\n');
+
+  return `:root {\\n${cssVars}\\n}`;
+}
+
+function generateSpacingScale(base) {
+  const scale = {};
+  for (let i = 0; i <= 16; i++) scale[i] = `${i * base}px`;
+  return scale;
+}
+
+module.exports = { generateDesignSystem };""",
+    },
+    {
+        "slug": "a11y-auditor",
+        "name": "Accessibility Auditor",
+        "author": "a11y-tools",
+        "description": "自动检测网页中的可访问性问题，包括 ARIA 属性缺失、颜色对比度不足、键盘导航缺陷等。",
+        "tags": ["accessibility", "a11y", "frontend", "testing"],
+        "capabilities": ["file_read", "network_access", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 91,
+        "security_report": {"level": "safe", "score": 91, "findings": [], "scannedAt": "2026-09-02T11:00:00Z"},
+        "install_command": "skillhub install a11y-auditor",
+        "downloads": 6700,
+        "stars": 203,
+        "content": """// Accessibility Auditor
+const axe = require('axe-core');
+const { callLLM } = require('./llm');
+
+async function auditAccessibility(urlOrHtml) {
+  const results = await axe.run(urlOrHtml);
+  const violations = results.violations.map(v => ({
+    id: v.id,
+    impact: v.impact,
+    description: v.description,
+    nodes: v.nodes.length,
+    help: v.help,
+    helpUrl: v.helpUrl,
+  }));
+
+  const suggestions = await callLLM(
+    `Suggest fixes for these a11y violations: ${JSON.stringify(violations)}`
+  );
+
+  return { score: calculateScore(violations), violations, suggestions };
+}
+
+function calculateScore(violations) {
+  const weights = { minor: 1, moderate: 3, serious: 5, critical: 10 };
+  const penalty = violations.reduce((sum, v) => sum + (weights[v.impact] || 1) * v.nodes, 0);
+  return Math.max(0, 100 - penalty);
+}
+
+module.exports = { auditAccessibility };""",
+    },
+    {
+        "slug": "frontend-perf-analyzer",
+        "name": "Frontend Performance Analyzer",
+        "author": "perf-expert",
+        "description": "分析前端性能瓶颈，检测 Core Web Vitals、包体积、渲染阻塞资源，并给出优化建议。",
+        "tags": ["performance", "frontend", "optimization", "web-vitals"],
+        "capabilities": ["file_read", "network_access", "process_exec"],
+        "risk_level": "low",
+        "security_score": 80,
+        "security_report": {
+            "level": "low",
+            "score": 80,
+            "findings": [
+                {
+                    "id": "f28",
+                    "severity": "low",
+                    "title": "通过 Lighthouse 执行性能分析",
+                    "description": "调用 Lighthouse CLI 进行页面分析，会在无头浏览器中加载目标页面。",
+                    "recommendation": "确保仅分析授权的目标 URL。分析结果不涉及敏感数据。",
+                }
+            ],
+            "scannedAt": "2026-09-02T12:00:00Z",
+        },
+        "install_command": "skillhub install frontend-perf-analyzer",
+        "downloads": 13200,
+        "stars": 410,
+        "content": """// Frontend Performance Analyzer
+const { execSync } = require('child_process');
+
+async function analyzePerformance(url, options = {}) {
+  const lhResult = execSync(
+    `npx lighthouse ${url} --output=json --quiet`
+  ).toString();
+  const report = JSON.parse(lhResult);
+
+  return {
+    lcp: report.audits['largest-contentful-paint'].numericValue,
+    fid: report.audits['max-potential-fid'].numericValue,
+    cls: report.audits['cumulative-layout-shift'].numericValue,
+    bundleSize: analyzeBundle(report),
+    renderBlocking: report.audits['render-blocking-resources'],
+    score: report.categories.performance.score * 100,
+  };
+}
+
+function analyzeBundle(report) {
+  const totalBytes = report.audits['total-byte-weight'].numericValue;
+  return { totalBytes, recommendation: totalBytes > 500000 ? 'Consider code splitting' : 'OK' };
+}
+
+module.exports = { analyzePerformance };""",
+    },
+    # ── Backend Frameworks ────────────────────────────────────────────
+    {
+        "slug": "express-api-scaffold",
+        "name": "Express API Scaffold",
+        "author": "backend-craft",
+        "description": "快速搭建 Express REST API 项目，自动生成路由、中间件、错误处理、请求校验和 Swagger 文档。",
+        "tags": ["express", "backend", "REST", "scaffold"],
+        "capabilities": ["file_read", "file_write"],
+        "risk_level": "safe",
+        "security_score": 90,
+        "security_report": {"level": "safe", "score": 90, "findings": [], "scannedAt": "2026-09-03T08:00:00Z"},
+        "install_command": "skillhub install express-api-scaffold",
+        "downloads": 18700,
+        "stars": 543,
+        "content": """// Express API Scaffold
+const fs = require('fs');
+const path = require('path');
+
+function scaffoldRoute(resource, fields) {
+  const routes = `
+const express = require('express');
+const router = express.Router();
+const { validate } = require('../middleware/validate');
+
+router.get('/', async (req, res) => { /* list */ });
+router.get('/:id', async (req, res) => { /* get one */ });
+router.post('/', validate(${JSON.stringify(fields)}), async (req, res) => { /* create */ });
+router.put('/:id', validate(${JSON.stringify(fields)}), async (req, res) => { /* update */ });
+router.delete('/:id', async (req, res) => { /* delete */ });
+
+module.exports = router;`;
+  return routes;
+}
+
+function generateMiddleware() {
+  return `
+const errorHandler = (err, req, res, next) => {
+  const status = err.status || 500;
+  res.status(status).json({ error: { code: status, message: err.message } });
+};
+const requestLogger = (req, res, next) => { console.log(req.method, req.url); next(); };
+module.exports = { errorHandler, requestLogger };`;
+}
+
+module.exports = { scaffoldRoute, generateMiddleware };""",
+    },
+    {
+        "slug": "fastapi-boilerplate",
+        "name": "FastAPI Boilerplate",
+        "author": "python-pro",
+        "description": "生成 FastAPI 项目骨架，包含 Pydantic 模型、依赖注入、异步路由、数据库集成和自动 API 文档。",
+        "tags": ["fastapi", "backend", "python", "async"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 93,
+        "security_report": {"level": "safe", "score": 93, "findings": [], "scannedAt": "2026-09-03T09:00:00Z"},
+        "install_command": "skillhub install fastapi-boilerplate",
+        "downloads": 15300,
+        "stars": 467,
+        "content": """// FastAPI Boilerplate Generator
+const fs = require('fs');
+const path = require('path');
+
+function generateModel(name, fields) {
+  const fieldDefs = fields.map(f => `    ${f.name}: ${mapType(f.type)}`).join('\\n');
+  return `from pydantic import BaseModel
+from datetime import datetime
+from uuid import UUID
+
+class ${name}Base(BaseModel):
+${fieldDefs}
+
+class ${name}Create(${name}Base):
+    pass
+
+class ${name}Response(${name}Base):
+    id: UUID
+    created_at: datetime
+    updated_at: datetime`;
+}
+
+function generateRouter(name) {
+  return `from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+router = APIRouter(prefix="/${name.toLowerCase()}s", tags=["${name}"])
+
+@router.get("/")
+async def list_items(skip: int = 0, limit: int = 20):
+    pass
+
+@router.post("/", status_code=201)
+async def create_item(item: ${name}Create):
+    pass`;
+}
+
+function mapType(type) {
+  const map = { string: 'str', number: 'float', boolean: 'bool', uuid: 'UUID' };
+  return map[type] || 'str';
+}
+
+module.exports = { generateModel, generateRouter };""",
+    },
+    {
+        "slug": "graphql-schema-builder",
+        "name": "GraphQL Schema Builder",
+        "author": "graphql-guru",
+        "description": "根据数据模型描述自动生成 GraphQL schema、resolver 骨架和类型定义，支持订阅和联合类型。",
+        "tags": ["graphql", "backend", "schema", "API"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 91,
+        "security_report": {"level": "safe", "score": 91, "findings": [], "scannedAt": "2026-09-03T10:00:00Z"},
+        "install_command": "skillhub install graphql-schema-builder",
+        "downloads": 9400,
+        "stars": 287,
+        "content": """// GraphQL Schema Builder
+const { callLLM } = require('./llm');
+
+function buildTypeDefs(models) {
+  return models.map(model => {
+    const fields = Object.entries(model.fields)
+      .map(([name, type]) => `  ${name}: ${toGraphQLType(type)}`)
+      .join('\\n');
+    return `type ${model.name} {\\n  id: ID!\\n${fields}\\n  createdAt: String\\n}`;
+  }).join('\\n\\n');
+}
+
+function buildResolvers(models) {
+  const resolvers = {};
+  for (const model of models) {
+    resolvers[model.name] = {
+      Query: {
+        [`${model.name.toLowerCase()}s`]: (_, args) => `/* fetch ${model.name}s */`,
+        [model.name.toLowerCase()]: (_, { id }) => `/* fetch ${model.name} by id */`,
+      },
+      Mutation: {
+        [`create${model.name}`]: (_, { input }) => `/* create ${model.name} */`,
+      },
+    };
+  }
+  return resolvers;
+}
+
+function toGraphQLType(type) {
+  const map = { string: 'String', int: 'Int', float: 'Float', boolean: 'Boolean' };
+  return map[type] || 'String';
+}
+
+module.exports = { buildTypeDefs, buildResolvers };""",
+    },
+    {
+        "slug": "grpc-service-gen",
+        "name": "gRPC Service Generator",
+        "author": "proto-dev",
+        "description": "从 proto 文件定义生成 gRPC 服务端和客户端代码，包含拦截器、重试逻辑和健康检查。",
+        "tags": ["grpc", "backend", "protobuf", "microservices"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "low",
+        "security_score": 78,
+        "security_report": {
+            "level": "low",
+            "score": 78,
+            "findings": [
+                {
+                    "id": "f29",
+                    "severity": "low",
+                    "title": "调用 protoc 编译器",
+                    "description": "通过 child_process 调用 protoc 生成代码。proto 文件路径由用户提供。",
+                    "recommendation": "验证 proto 文件路径在预期目录内。限制 protoc 参数。",
+                }
+            ],
+            "scannedAt": "2026-09-03T11:00:00Z",
+        },
+        "install_command": "skillhub install grpc-service-gen",
+        "downloads": 5200,
+        "stars": 156,
+        "content": """// gRPC Service Generator
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+function generateFromProto(protoFile, options = {}) {
+  const outDir = options.outDir || './generated';
+  execSync(
+    `protoc --js_out=import_style=commonjs,binary:${outDir} ` +
+    `--grpc_out=${outDir} ` +
+    `--plugin=protoc-gen-grpc=$(which grpc_tools_node_protoc_plugin) ` +
+    `${protoFile}`
+  );
+  return { generated: true, outDir };
+}
+
+function createHealthCheck(serviceName) {
+  return {
+    check: (_, callback) => callback(null, { status: 'SERVING' }),
+    watch: () => { throw new Error('UNIMPLEMENTED'); },
+  };
+}
+
+module.exports = { generateFromProto, createHealthCheck };""",
+    },
+    # ── Mobile Development ────────────────────────────────────────────
+    {
+        "slug": "react-native-scaffold",
+        "name": "React Native Project Scaffolder",
+        "author": "mobile-dev",
+        "description": "一键生成 React Native 项目结构，包含导航配置、状态管理、主题系统和常用屏幕模板。",
+        "tags": ["react-native", "mobile", "scaffold", "typescript"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "safe",
+        "security_score": 89,
+        "security_report": {"level": "safe", "score": 89, "findings": [], "scannedAt": "2026-09-03T12:00:00Z"},
+        "install_command": "skillhub install react-native-scaffold",
+        "downloads": 10600,
+        "stars": 318,
+        "content": """// React Native Project Scaffolder
+const fs = require('fs');
+const path = require('path');
+
+function generateScreen(name, options = {}) {
+  const imports = [
+    "import React from 'react';",
+    "import { View, Text, StyleSheet } from 'react-native';",
+    options.usesNavigation ? "import { useNavigation } from '@react-navigation/native';" : '',
+  ].filter(Boolean).join('\\n');
+
+  return `${imports}
+
+export default function ${name}Screen() {
+  ${options.usesNavigation ? 'const navigation = useNavigation();' : ''}
+  return (
+    <View style={styles.container}>
+      <Text>${name}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});`;
+}
+
+function generateNavigation(screens) {
+  return screens.map(s => `  <Stack.Screen name="${s.name}" component={${s.name}Screen} />`).join('\\n');
+}
+
+module.exports = { generateScreen, generateNavigation };""",
+    },
+    {
+        "slug": "flutter-widget-gen",
+        "name": "Flutter Widget Generator",
+        "author": "dart-forge",
+        "description": "根据 UI 描述生成 Flutter Widget 代码，支持 Material 和 Cupertino 风格，包含状态管理和响应式布局。",
+        "tags": ["flutter", "mobile", "dart", "widget"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 95,
+        "security_report": {"level": "safe", "score": 95, "findings": [], "scannedAt": "2026-09-03T13:00:00Z"},
+        "install_command": "skillhub install flutter-widget-gen",
+        "downloads": 7800,
+        "stars": 234,
+        "content": """// Flutter Widget Generator
+const { callLLM } = require('./llm');
+
+async function generateWidget(description, options = {}) {
+  const style = options.style || 'material';
+  const prompt = `Generate a Flutter widget:
+Description: ${description}
+Style: ${style}
+State management: ${options.stateManagement || 'Provider'}
+Responsive: ${options.responsive !== false}`;
+
+  const result = await callLLM(prompt);
+  return {
+    code: result.dartCode,
+    testCode: result.testCode,
+    preview: result.widgetTree,
+  };
+}
+
+function wrapWithResponsive(widgetCode) {
+  return `class ResponsiveWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) return MobileLayout(child: ${widgetCode});
+        if (constraints.maxWidth < 1200) return TabletLayout(child: ${widgetCode});
+        return DesktopLayout(child: ${widgetCode});
+      },
+    );
+  }
+}`;
+}
+
+module.exports = { generateWidget, wrapWithResponsive };""",
+    },
+    # ── Data Visualization & Analytics ────────────────────────────────
+    {
+        "slug": "chart-generator",
+        "name": "Chart Generator",
+        "author": "viz-studio",
+        "description": "从数据自动生成可视化图表，支持折线图、柱状图、饼图、散点图等，可导出 SVG/PNG。",
+        "tags": ["visualization", "charts", "data", "SVG"],
+        "capabilities": ["file_read", "file_write"],
+        "risk_level": "safe",
+        "security_score": 97,
+        "security_report": {"level": "safe", "score": 97, "findings": [], "scannedAt": "2026-09-04T08:00:00Z"},
+        "install_command": "skillhub install chart-generator",
+        "downloads": 16400,
+        "stars": 501,
+        "content": """// Chart Generator
+const fs = require('fs');
+
+function generateBarChart(data, options = {}) {
+  const { width = 600, height = 400, color = '#4F46E5' } = options;
+  const maxValue = Math.max(...data.map(d => d.value));
+  const barWidth = (width - 60) / data.length;
+
+  const bars = data.map((d, i) => {
+    const barHeight = (d.value / maxValue) * (height - 60);
+    const x = 40 + i * barWidth;
+    const y = height - 30 - barHeight;
+    return `<rect x="${x}" y="${y}" width="${barWidth - 4}" height="${barHeight}" fill="${color}" />
+            <text x="${x + barWidth / 2}" y="${height - 10}" text-anchor="middle" font-size="12">${d.label}</text>`;
+  }).join('\\n');
+
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  <line x1="40" y1="10" x2="40" y2="${height - 30}" stroke="#333" />
+  <line x1="40" y1="${height - 30}" x2="${width - 10}" y2="${height - 30}" stroke="#333" />
+  ${bars}
+</svg>`;
+}
+
+module.exports = { generateBarChart };""",
+    },
+    {
+        "slug": "dashboard-builder",
+        "name": "Analytics Dashboard Builder",
+        "author": "viz-studio",
+        "description": "快速构建数据分析仪表板，支持 KPI 卡片、趋势图、数据表格和多数据源聚合。",
+        "tags": ["dashboard", "analytics", "visualization", "react"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 90,
+        "security_report": {"level": "safe", "score": 90, "findings": [], "scannedAt": "2026-09-04T09:00:00Z"},
+        "install_command": "skillhub install dashboard-builder",
+        "downloads": 12100,
+        "stars": 368,
+        "content": """// Analytics Dashboard Builder
+const { callLLM } = require('./llm');
+
+function createKPICard(title, value, change, trend = 'up') {
+  const color = trend === 'up' ? '#10B981' : '#EF4444';
+  const arrow = trend === 'up' ? '↑' : '↓';
+  return {
+    type: 'kpi',
+    title,
+    value: formatNumber(value),
+    change: `${arrow} ${Math.abs(change)}%`,
+    color,
+  };
+}
+
+function buildDashboard(layout, dataSources) {
+  const panels = layout.map(panel => ({
+    id: panel.id,
+    title: panel.title,
+    type: panel.chartType,
+    data: dataSources[panel.source],
+    position: panel.position,
+  }));
+  return { panels, layout: optimizeLayout(panels) };
+}
+
+function formatNumber(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return n.toString();
+}
+
+module.exports = { createKPICard, buildDashboard };""",
+    },
+    # ── AI / ML ───────────────────────────────────────────────────────
+    {
+        "slug": "dataset-preparator",
+        "name": "Dataset Preparator",
+        "author": "ml-pipeline",
+        "description": "自动化机器学习数据预处理：清洗、特征工程、数据增强、格式转换和 train/val/test 划分。",
+        "tags": ["ML", "data", "preprocessing", "training"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "low",
+        "security_score": 82,
+        "security_report": {
+            "level": "low",
+            "score": 82,
+            "findings": [
+                {
+                    "id": "f30",
+                    "severity": "low",
+                    "title": "执行 Python 预处理脚本",
+                    "description": "调用 Python 子进程执行 pandas/sklearn 数据处理。输入数据路径由用户提供。",
+                    "recommendation": "验证输入路径在授权范围内。限制子进程的内存和 CPU 使用。",
+                }
+            ],
+            "scannedAt": "2026-09-04T10:00:00Z",
+        },
+        "install_command": "skillhub install dataset-preparator",
+        "downloads": 8500,
+        "stars": 252,
+        "content": """// Dataset Preparator
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function prepareDataset(config) {
+  const script = buildPythonScript(config);
+  fs.writeFileSync('/tmp/prepare.py', script);
+  execSync(`python /tmp/prepare.py --input ${config.input} --output ${config.output}`);
+  return { split: config.split || { train: 0.8, val: 0.1, test: 0.1 } };
+}
+
+function buildPythonScript(config) {
+  return `
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv("${config.input}")
+df = df.dropna(subset=${JSON.stringify(config.requiredFields)})
+if "${config.encoding}" == "onehot":
+    df = pd.get_dummies(df, columns=${JSON.stringify(config.categoricalFields)})
+train, test = train_test_split(df, test_size=${config.split?.test || 0.1})
+train.to_csv("${config.output}/train.csv", index=False)
+test.to_csv("${config.output}/test.csv", index=False)`;
+}
+
+module.exports = { prepareDataset };""",
+    },
+    {
+        "slug": "model-finetuner",
+        "name": "Model Fine-tuner",
+        "author": "ml-pipeline",
+        "description": "简化 LLM 模型微调流程：数据格式校验、超参数推荐、训练监控和评估报告生成。",
+        "tags": ["ML", "LLM", "fine-tuning", "training"],
+        "capabilities": ["file_read", "file_write", "network_access", "llm_call"],
+        "risk_level": "medium",
+        "security_score": 60,
+        "security_report": {
+            "level": "medium",
+            "score": 60,
+            "findings": [
+                {
+                    "id": "f31",
+                    "severity": "medium",
+                    "title": "访问外部训练 API",
+                    "description": "通过 HTTP 调用 OpenAI / HuggingFace 微调 API，需要传输 API 密钥。",
+                    "recommendation": "确保 API 密钥通过环境变量注入，不写入日志或配置文件。",
+                },
+                {
+                    "id": "f32",
+                    "severity": "low",
+                    "title": "训练数据本地存储",
+                    "description": "微调数据集以 JSONL 格式存储在本地，可能包含敏感训练数据。",
+                    "recommendation": "训练完成后清理临时文件。对敏感数据使用加密存储。",
+                },
+            ],
+            "scannedAt": "2026-09-04T11:00:00Z",
+        },
+        "install_command": "skillhub install model-finetuner",
+        "downloads": 4200,
+        "stars": 134,
+        "content": """// Model Fine-tuner
+const axios = require('axios');
+const fs = require('fs');
+
+async function startFineTune(config) {
+  validateDataset(config.datasetPath);
+  const hyperparams = recommendHyperparams(config);
+
+  const response = await axios.post('https://api.openai.com/v1/fine_tuning/jobs', {
+    training_file: await uploadDataset(config.datasetPath),
+    model: config.model || 'gpt-4o-mini-2024-07-18',
+    hyperparameters: hyperparams,
+    suffix: config.suffix,
+  }, {
+    headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+  });
+
+  return { jobId: response.data.id, status: response.data.status, hyperparams };
+}
+
+function recommendHyperparams(config) {
+  return {
+    n_epochs: config.epochs || 3,
+    batch_size: config.batchSize || 4,
+    learning_rate_multiplier: config.lr || 1.0,
+  };
+}
+
+function validateDataset(filePath) {
+  const lines = fs.readFileSync(filePath, 'utf-8').split('\\n').filter(Boolean);
+  const invalid = lines.filter((l, i) => { try { JSON.parse(l); return false; } catch { return true; } });
+  if (invalid.length > 0) throw new Error(`${invalid.length} invalid JSONL lines`);
+}
+
+module.exports = { startFineTune };""",
+    },
+    {
+        "slug": "rag-pipeline",
+        "name": "RAG Pipeline Builder",
+        "author": "ai-tools",
+        "description": "构建检索增强生成 (RAG) 管道：文档切分、向量化、检索策略优化和答案生成。",
+        "tags": ["RAG", "LLM", "vector-search", "NLP"],
+        "capabilities": ["file_read", "file_write", "network_access", "llm_call"],
+        "risk_level": "medium",
+        "security_score": 63,
+        "security_report": {
+            "level": "medium",
+            "score": 63,
+            "findings": [
+                {
+                    "id": "f33",
+                    "severity": "medium",
+                    "title": "外部向量数据库和 LLM API 调用",
+                    "description": "连接外部向量数据库 (Pinecone/Weaviate) 和 LLM API，凭证通过环境变量管理。",
+                    "recommendation": "使用密钥管理服务存储凭证。对 API 调用添加超时和重试逻辑。",
+                }
+            ],
+            "scannedAt": "2026-09-04T12:00:00Z",
+        },
+        "install_command": "skillhub install rag-pipeline",
+        "downloads": 11900,
+        "stars": 375,
+        "content": """// RAG Pipeline Builder
+const { callLLM } = require('./llm');
+
+async function buildRAGPipeline(config) {
+  const chunker = new DocumentChunker({
+    chunkSize: config.chunkSize || 512,
+    overlap: config.overlap || 50,
+    strategy: config.strategy || 'recursive',
+  });
+
+  const embedder = new Embedder({
+    model: config.embeddingModel || 'text-embedding-3-small',
+    dimensions: config.dimensions || 1536,
+  });
+
+  return {
+    async query(question) {
+      const chunks = await chunker.split(question);
+      const embeddings = await embedder.embed(chunks);
+      const results = await config.vectorStore.search(embeddings, { topK: 5 });
+      const context = results.map(r => r.text).join('\\n---\\n');
+      const answer = await callLLM(
+        `Answer based on context:\\n${context}\\n\\nQuestion: ${question}`
+      );
+      return { answer, sources: results };
+    },
+  };
+}
+
+module.exports = { buildRAGPipeline };""",
+    },
+    # ── Infrastructure as Code ────────────────────────────────────────
+    {
+        "slug": "k8s-manifest-gen",
+        "name": "Kubernetes Manifest Generator",
+        "author": "infra-team",
+        "description": "根据应用描述自动生成 Kubernetes 部署清单，包含 Deployment、Service、Ingress 和 HPA 配置。",
+        "tags": ["kubernetes", "infrastructure", "devops", "yaml"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "low",
+        "security_score": 74,
+        "security_report": {
+            "level": "low",
+            "score": 74,
+            "findings": [
+                {
+                    "id": "f34",
+                    "severity": "low",
+                    "title": "生成的清单包含默认配置",
+                    "description": "生成的 YAML 使用默认的资源限制和安全上下文，可能不完全适合生产环境。",
+                    "recommendation": "在部署前审查生成的清单。根据实际负载调整资源限制。",
+                }
+            ],
+            "scannedAt": "2026-09-05T08:00:00Z",
+        },
+        "install_command": "skillhub install k8s-manifest-gen",
+        "downloads": 14800,
+        "stars": 445,
+        "content": """// Kubernetes Manifest Generator
+const yaml = require('js-yaml');
+
+function generateDeployment(app) {
+  return {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: { name: app.name, labels: { app: app.name } },
+    spec: {
+      replicas: app.replicas || 3,
+      selector: { matchLabels: { app: app.name } },
+      template: {
+        metadata: { labels: { app: app.name } },
+        spec: {
+          containers: [{
+            name: app.name,
+            image: app.image,
+            ports: [{ containerPort: app.port || 3000 }],
+            resources: {
+              requests: { cpu: '100m', memory: '128Mi' },
+              limits: { cpu: '500m', memory: '512Mi' },
+            },
+            livenessProbe: { httpGet: { path: '/health', port: app.port || 3000 } },
+          }],
+        },
+      },
+    },
+  };
+}
+
+function generateService(name, port) {
+  return {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: { name },
+    spec: { selector: { app: name }, ports: [{ port, targetPort: port }] },
+  };
+}
+
+module.exports = { generateDeployment, generateService };""",
+    },
+    {
+        "slug": "terraform-planner",
+        "name": "Terraform Plan Analyzer",
+        "author": "infra-team",
+        "description": "分析 Terraform 配置，预测变更影响，检测安全风险和成本估算。支持 plan 输出解读。",
+        "tags": ["terraform", "infrastructure", "IaC", "cloud"],
+        "capabilities": ["file_read", "process_exec", "llm_call"],
+        "risk_level": "low",
+        "security_score": 76,
+        "security_report": {
+            "level": "low",
+            "score": 76,
+            "findings": [
+                {
+                    "id": "f35",
+                    "severity": "low",
+                    "title": "执行 terraform plan 命令",
+                    "description": "通过 child_process 执行 terraform plan 分析配置变更。",
+                    "recommendation": "确保仅在授权的工作目录中执行。限制 terraform 子进程权限。",
+                }
+            ],
+            "scannedAt": "2026-09-05T09:00:00Z",
+        },
+        "install_command": "skillhub install terraform-planner",
+        "downloads": 9100,
+        "stars": 278,
+        "content": """// Terraform Plan Analyzer
+const { execSync } = require('child_process');
+const { callLLM } = require('./llm');
+
+async function analyzePlan(workDir) {
+  const planOutput = execSync('terraform plan -json', { cwd: workDir }).toString();
+  const plan = JSON.parse(planOutput);
+
+  const summary = {
+    adds: plan.resource_changes.filter(r => r.change.actions.includes('create')).length,
+    changes: plan.resource_changes.filter(r => r.change.actions.includes('update')).length,
+    destroys: plan.resource_changes.filter(r => r.change.actions.includes('delete')).length,
+  };
+
+  const risks = detectRisks(plan.resource_changes);
+  const costEstimate = await estimateCost(plan.resource_changes);
+
+  return { summary, risks, costEstimate };
+}
+
+function detectRisks(changes) {
+  return changes
+    .filter(r => r.change.actions.includes('delete') || r.change.actions.includes('replace'))
+    .map(r => ({ resource: r.address, action: r.change.actions, risk: 'destructive' }));
+}
+
+module.exports = { analyzePlan };""",
+    },
+    {
+        "slug": "aws-cloudform",
+        "name": "AWS CloudFormation Helper",
+        "author": "cloud-architect",
+        "description": "辅助生成 AWS CloudFormation 模板，包含常用架构模式、参数验证和最佳实践检查。",
+        "tags": ["AWS", "cloud", "infrastructure", "CloudFormation"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "low",
+        "security_score": 77,
+        "security_report": {
+            "level": "low",
+            "score": 77,
+            "findings": [
+                {
+                    "id": "f36",
+                    "severity": "low",
+                    "title": "生成的模板包含默认 IAM 策略",
+                    "description": "为简化使用，生成的 IAM 角色可能包含过度宽泛的权限策略。",
+                    "recommendation": "部署前审查 IAM 策略，遵循最小权限原则。",
+                }
+            ],
+            "scannedAt": "2026-09-05T10:00:00Z",
+        },
+        "install_command": "skillhub install aws-cloudform",
+        "downloads": 7300,
+        "stars": 219,
+        "content": """// AWS CloudFormation Helper
+const yaml = require('js-yaml');
+
+function generateECSTemplate(config) {
+  return {
+    AWSTemplateFormatVersion: '2010-09-09',
+    Parameters: {
+      ImageUrl: { Type: 'String', Description: 'Docker image URL' },
+      ContainerPort: { Type: 'Number', Default: config.port || 3000 },
+      DesiredCount: { Type: 'Number', Default: config.desiredCount || 2 },
+    },
+    Resources: {
+      ECSCluster: { Type: 'AWS::ECS::Cluster', Properties: { ClusterName: config.name } },
+      TaskDefinition: {
+        Type: 'AWS::ECS::TaskDefinition',
+        Properties: {
+          Family: config.name,
+          ContainerDefinitions: [{
+            Name: config.name,
+            Image: { Ref: 'ImageUrl' },
+            PortMappings: [{ ContainerPort: { Ref: 'ContainerPort' } }],
+            LogConfiguration: {
+              LogDriver: 'awslogs',
+              Options: { 'awslogs-group': `/ecs/${config.name}` },
+            },
+          }],
+        },
+      },
+    },
+  };
+}
+
+module.exports = { generateECSTemplate };""",
+    },
+    # ── Productivity Tools ────────────────────────────────────────────
+    {
+        "slug": "smart-note-taker",
+        "name": "Smart Note Taker",
+        "author": "productivity-hub",
+        "description": "智能笔记管理工具，支持 Markdown 笔记、标签分类、全文搜索和 LLM 摘要生成。",
+        "tags": ["productivity", "notes", "markdown", "organization"],
+        "capabilities": ["file_read", "file_write", "llm_call"],
+        "risk_level": "safe",
+        "security_score": 93,
+        "security_report": {"level": "safe", "score": 93, "findings": [], "scannedAt": "2026-09-05T11:00:00Z"},
+        "install_command": "skillhub install smart-note-taker",
+        "downloads": 19500,
+        "stars": 598,
+        "content": """// Smart Note Taker
+const fs = require('fs');
+const path = require('path');
+const { callLLM } = require('./llm');
+
+const NOTES_DIR = process.env.NOTES_DIR || './notes';
+
+async function createNote(title, content, tags = []) {
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const filePath = path.join(NOTES_DIR, `${slug}.md`);
+  const frontMatter = `---\\ntitle: ${title}\\ntags: [${tags.join(', ')}]\\ncreated: ${new Date().toISOString()}\\n---\\n\\n`;
+  fs.writeFileSync(filePath, frontMatter + content);
+  return { path: filePath, slug };
+}
+
+async function summarizeNote(filePath) {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const summary = await callLLM(`Summarize this note:\\n${content}`);
+  return { summary, wordCount: content.split(/\\s+/).length };
+}
+
+function searchNotes(query) {
+  const files = fs.readdirSync(NOTES_DIR).filter(f => f.endsWith('.md'));
+  return files.filter(f => {
+    const content = fs.readFileSync(path.join(NOTES_DIR, f), 'utf-8');
+    return content.toLowerCase().includes(query.toLowerCase());
+  });
+}
+
+module.exports = { createNote, summarizeNote, searchNotes };""",
+    },
+    {
+        "slug": "task-automator",
+        "name": "Task Automator",
+        "author": "productivity-hub",
+        "description": "定义和自动化重复性任务，支持定时执行、条件触发、任务依赖链和执行日志。",
+        "tags": ["productivity", "automation", "scheduling", "workflow"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "medium",
+        "security_score": 56,
+        "security_report": {
+            "level": "medium",
+            "score": 56,
+            "findings": [
+                {
+                    "id": "f37",
+                    "severity": "high",
+                    "title": "执行用户定义的任务命令",
+                    "description": "任务定义中可包含任意 shell 命令，技能会按配置执行这些命令。",
+                    "evidence": "execSync(task.command)",
+                    "recommendation": "限制可执行的命令白名单。对危险命令 (rm -rf, curl | bash) 进行拦截。",
+                },
+                {
+                    "id": "f38",
+                    "severity": "medium",
+                    "title": "定时任务持续运行",
+                    "description": "定时任务通过 setInterval 持续运行，可能消耗较多系统资源。",
+                    "recommendation": "添加最大并发任务数限制。设置单个任务的超时时间。",
+                },
+            ],
+            "scannedAt": "2026-09-05T12:00:00Z",
+        },
+        "install_command": "skillhub install task-automator",
+        "downloads": 8200,
+        "stars": 245,
+        "content": """// Task Automator
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+class TaskRunner {
+  constructor() { this.tasks = new Map(); this.logs = []; }
+
+  register(name, config) {
+    this.tasks.set(name, {
+      command: config.command,
+      schedule: config.schedule,
+      retries: config.retries || 3,
+      dependencies: config.dependsOn || [],
+    });
+  }
+
+  async run(name) {
+    const task = this.tasks.get(name);
+    if (!task) throw new Error(`Task '${name}' not found`);
+    const startTime = Date.now();
+    try {
+      const output = execSync(task.command, { timeout: 30000 }).toString();
+      this.logs.push({ task: name, status: 'success', duration: Date.now() - startTime });
+      return { output, status: 'success' };
+    } catch (err) {
+      this.logs.push({ task: name, status: 'failed', error: err.message });
+      return { status: 'failed', error: err.message };
+    }
+  }
+}
+
+module.exports = { TaskRunner };""",
+    },
+    # ── Communication ─────────────────────────────────────────────────
+    {
+        "slug": "email-template-engine",
+        "name": "Email Template Engine",
+        "author": "comm-tools",
+        "description": "生成响应式邮件模板，支持 MJML/HTML 输出、变量替换、预览和主流邮件服务集成。",
+        "tags": ["email", "templates", "communication", "HTML"],
+        "capabilities": ["file_read", "file_write", "network_access", "llm_call"],
+        "risk_level": "low",
+        "security_score": 79,
+        "security_report": {
+            "level": "low",
+            "score": 79,
+            "findings": [
+                {
+                    "id": "f39",
+                    "severity": "low",
+                    "title": "邮件模板变量替换",
+                    "description": "模板中的变量由用户提供，如果未经清理可能导致邮件内容注入。",
+                    "recommendation": "对所有变量进行 HTML 转义。限制可用的模板变量白名单。",
+                }
+            ],
+            "scannedAt": "2026-09-06T08:00:00Z"},
+        "install_command": "skillhub install email-template-engine",
+        "downloads": 13700,
+        "stars": 412,
+        "content": """// Email Template Engine
+const fs = require('fs');
+const path = require('path');
+
+function renderTemplate(templateName, variables) {
+  const template = fs.readFileSync(
+    path.join(__dirname, 'templates', `${templateName}.mjml`), 'utf-8'
+  );
+  let rendered = template;
+  for (const [key, value] of Object.entries(variables)) {
+    const escaped = escapeHtml(String(value));
+    rendered = rendered.replace(new RegExp(`\\\\{\\\\{${key}\\\\}\\\\}`, 'g'), escaped);
+  }
+  return rendered;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function generatePreview(html) {
+  return { textContent: html.replace(/<[^>]*>/g, '').substring(0, 200), html };
+}
+
+module.exports = { renderTemplate, generatePreview };""",
+    },
+    {
+        "slug": "webhook-relay",
+        "name": "Webhook Relay",
+        "author": "comm-tools",
+        "description": "管理 Webhook 接收、转发、重试和日志记录。支持签名验证、请求转换和多目标分发。",
+        "tags": ["webhooks", "integration", "communication", "API"],
+        "capabilities": ["network_access", "file_read", "file_write"],
+        "risk_level": "medium",
+        "security_score": 64,
+        "security_report": {
+            "level": "medium",
+            "score": 64,
+            "findings": [
+                {
+                    "id": "f40",
+                    "severity": "medium",
+                    "title": "转发请求到用户配置的 URL",
+                    "description": "Webhook 内容被转发到用户指定的 URL，目标地址未做白名单限制。",
+                    "evidence": "axios.post(targetUrl, payload)",
+                    "recommendation": "添加目标 URL 白名单配置。验证 SSL 证书。",
+                },
+                {
+                    "id": "f41",
+                    "severity": "low",
+                    "title": "Webhook 请求体存储",
+                    "description": "接收到的 webhook 请求体被写入日志文件，可能包含敏感数据。",
+                    "recommendation": "对日志中的敏感字段进行脱敏。设置日志文件大小限制。",
+                },
+            ],
+            "scannedAt": "2026-09-06T09:00:00Z",
+        },
+        "install_command": "skillhub install webhook-relay",
+        "downloads": 6800,
+        "stars": 201,
+        "content": """// Webhook Relay
+const axios = require('axios');
+const crypto = require('crypto');
+const fs = require('fs');
+
+function verifySignature(payload, signature, secret) {
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+
+async function relayWebhook(payload, targets) {
+  const results = [];
+  for (const target of targets) {
+    try {
+      const res = await axios.post(target.url, payload, {
+        headers: target.headers || {},
+        timeout: target.timeout || 5000,
+      });
+      results.push({ url: target.url, status: res.status });
+    } catch (err) {
+      results.push({ url: target.url, error: err.message });
+      if (target.retry) scheduleRetry(target, payload);
+    }
+  }
+  fs.appendFileSync('webhook.log', JSON.stringify({ timestamp: Date.now(), payload, results }) + '\\n');
+  return results;
+}
+
+module.exports = { verifySignature, relayWebhook };""",
+    },
+    # ── DevTools ──────────────────────────────────────────────────────
+    {
+        "slug": "eslint-config-gen",
+        "name": "ESLint Config Generator",
+        "author": "lint-master",
+        "description": "根据项目技术栈自动生成 ESLint 配置，支持 React/Vue/Node.js，集成 TypeScript 和 Prettier。",
+        "tags": ["linting", "code-quality", "eslint", "devtools"],
+        "capabilities": ["file_read", "file_write"],
+        "risk_level": "safe",
+        "security_score": 98,
+        "security_report": {"level": "safe", "score": 98, "findings": [], "scannedAt": "2026-09-06T10:00:00Z"},
+        "install_command": "skillhub install eslint-config-gen",
+        "downloads": 21300,
+        "stars": 654,
+        "content": """// ESLint Config Generator
+const fs = require('fs');
+const path = require('path');
+
+function generateConfig(projectType) {
+  const base = {
+    env: { es2024: true, node: true },
+    extends: ['eslint:recommended'],
+    rules: {
+      'no-unused-vars': 'warn',
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      'eqeqeq': ['error', 'always'],
+    },
+  };
+
+  if (projectType === 'react') {
+    base.extends.push('plugin:react/recommended', 'plugin:react-hooks/recommended');
+    base.plugins = ['react', 'react-hooks'];
+    base.settings = { react: { version: 'detect' } };
+  } else if (projectType === 'vue') {
+    base.extends.push('plugin:vue/vue3-recommended');
+    base.plugins = ['vue'];
+  }
+
+  if (hasTypeScript()) {
+    base.parser = '@typescript-eslint/parser';
+    base.extends.push('plugin:@typescript-eslint/recommended');
+  }
+
+  return base;
+}
+
+function hasTypeScript() {
+  return fs.existsSync('tsconfig.json');
+}
+
+module.exports = { generateConfig };""",
+    },
+    {
+        "slug": "prettier-formatter",
+        "name": "Code Formatter Pro",
+        "author": "lint-master",
+        "description": "统一的代码格式化工具，集成 Prettier 和 EditorConfig，支持自定义规则和多项目配置。",
+        "tags": ["formatting", "code-quality", "prettier", "devtools"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "safe",
+        "security_score": 91,
+        "security_report": {"level": "safe", "score": 91, "findings": [], "scannedAt": "2026-09-06T11:00:00Z"},
+        "install_command": "skillhub install prettier-formatter",
+        "downloads": 27600,
+        "stars": 843,
+        "content": """// Code Formatter Pro
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+function formatProject(dir, options = {}) {
+  const config = generatePrettierConfig(options);
+  const configPath = path.join(dir, '.prettierrc.json');
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+  const ignorePath = path.join(dir, '.prettierignore');
+  fs.writeFileSync(ignorePath, 'node_modules\\ndist\\nbuild\\n.next\\n');
+
+  execSync(`npx prettier --write "${dir}/**/*.{js,ts,tsx,jsx,json,css,md}"`, { cwd: dir });
+  return { formatted: true, config };
+}
+
+function generatePrettierConfig(options) {
+  return {
+    semi: options.semi !== false,
+    singleQuote: options.singleQuote !== false,
+    tabWidth: options.tabWidth || 2,
+    trailingComma: options.trailingComma || 'es5',
+    printWidth: options.printWidth || 100,
+    arrowParens: 'always',
+  };
+}
+
+module.exports = { formatProject, generatePrettierConfig };""",
+    },
+    {
+        "slug": "debug-profiler",
+        "name": "Debug Profiler",
+        "author": "debug-expert",
+        "description": "Node.js 应用调试和性能分析工具，支持 CPU profiling、内存泄漏检测和异步追踪。",
+        "tags": ["debugging", "profiling", "performance", "devtools"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "medium",
+        "security_score": 54,
+        "security_report": {
+            "level": "medium",
+            "score": 54,
+            "findings": [
+                {
+                    "id": "f42",
+                    "severity": "high",
+                    "title": "附加到运行中的进程",
+                    "description": "调试器通过 --inspect 附加到目标 Node.js 进程，可能暴露进程内存和变量。",
+                    "evidence": "execSync(`node --inspect=${port} ${script}`)",
+                    "recommendation": "限制调试端口只监听 localhost。在生产环境中禁用调试功能。",
+                },
+                {
+                    "id": "f43",
+                    "severity": "medium",
+                    "title": "内存快照包含敏感数据",
+                    "description": "堆内存快照可能包含密码、token 等敏感数据。",
+                    "recommendation": "分析完成后立即删除快照文件。不要在共享环境中使用。",
+                },
+            ],
+            "scannedAt": "2026-09-06T12:00:00Z",
+        },
+        "install_command": "skillhub install debug-profiler",
+        "downloads": 5400,
+        "stars": 167,
+        "content": """// Debug Profiler
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function startProfiling(script, options = {}) {
+  const port = options.port || 9229;
+  const proc = execSync(
+    `node --inspect=${port} --prof ${script}`,
+    { timeout: options.timeout || 30000 }
+  );
+
+  const isolate = execSync('node --prof-process isolate-*.log').toString();
+  return {
+    cpuProfile: parseProfile(isolate),
+    totalTime: extractTotalTime(isolate),
+    hotFunctions: extractHotFunctions(isolate),
+  };
+}
+
+function detectMemoryLeaks(script) {
+  const snapshots = [];
+  for (let i = 0; i < 3; i++) {
+    execSync(`node --heap-snapshot=${i} ${script}`);
+    snapshots.push(`Heap-${i}.heapsnapshot`);
+  }
+  return { snapshots, comparison: compareSnapshots(snapshots) };
+}
+
+module.exports = { startProfiling, detectMemoryLeaks };""",
+    },
+    {
+        "slug": "dependency-auditor",
+        "name": "Dependency Security Auditor",
+        "author": "sec-tools",
+        "description": "扫描项目依赖中的已知漏洞，生成安全报告并提供升级建议。支持 npm/pip/cargo。",
+        "tags": ["security", "dependencies", "supply-chain", "devtools"],
+        "capabilities": ["file_read", "process_exec", "network_access"],
+        "risk_level": "low",
+        "security_score": 83,
+        "security_report": {
+            "level": "low",
+            "score": 83,
+            "findings": [
+                {
+                    "id": "f44",
+                    "severity": "low",
+                    "title": "查询外部漏洞数据库",
+                    "description": "通过 npm audit / pip audit 等命令查询外部漏洞数据库，会暴露项目依赖信息。",
+                    "recommendation": "在私有环境中考虑使用本地漏洞数据库镜像。",
+                }
+            ],
+            "scannedAt": "2026-09-06T13:00:00Z",
+        },
+        "install_command": "skillhub install dependency-auditor",
+        "downloads": 17800,
+        "stars": 539,
+        "content": """// Dependency Security Auditor
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function auditDependencies(projectDir) {
+  const packageManager = detectPackageManager(projectDir);
+  let result;
+
+  switch (packageManager) {
+    case 'npm':
+      result = JSON.parse(execSync('npm audit --json', { cwd: projectDir }).toString());
+      break;
+    case 'pip':
+      result = parseAuditOutput(execSync('pip-audit --format=json', { cwd: projectDir }).toString());
+      break;
+    default:
+      throw new Error(`Unsupported package manager in ${projectDir}`);
+  }
+
+  return {
+    vulnerabilities: result.vulnerabilities || [],
+    summary: generateSummary(result),
+    recommendations: generateRecommendations(result),
+  };
+}
+
+function detectPackageManager(dir) {
+  if (fs.existsSync(`${dir}/package.json`)) return 'npm';
+  if (fs.existsSync(`${dir}/requirements.txt`) || fs.existsSync(`${dir}/Pipfile`)) return 'pip';
+  if (fs.existsSync(`${dir}/Cargo.toml`)) return 'cargo';
+  return 'unknown';
+}
+
+module.exports = { auditDependencies };""",
+    },
+    # ── Cloud Services ────────────────────────────────────────────────
+    {
+        "slug": "aws-lambda-helper",
+        "name": "AWS Lambda Helper",
+        "author": "cloud-architect",
+        "description": "简化 AWS Lambda 函数开发：模板生成、本地测试模拟、部署打包和 CloudWatch 日志分析。",
+        "tags": ["AWS", "lambda", "serverless", "cloud"],
+        "capabilities": ["file_read", "file_write", "process_exec", "network_access"],
+        "risk_level": "medium",
+        "security_score": 61,
+        "security_report": {
+            "level": "medium",
+            "score": 61,
+            "findings": [
+                {
+                    "id": "f45",
+                    "severity": "medium",
+                    "title": "调用 AWS API 进行部署",
+                    "description": "通过 AWS CLI/SDK 部署 Lambda 函数，需要 AWS 凭证。",
+                    "recommendation": "使用 IAM 角色而非长期凭证。遵循最小权限原则配置 IAM 策略。",
+                },
+                {
+                    "id": "f46",
+                    "severity": "low",
+                    "title": "打包时包含本地文件",
+                    "description": "部署包可能意外包含 .env 或其他敏感文件。",
+                    "recommendation": "使用 .lamdaignore 排除敏感文件。审查部署包内容。",
+                },
+            ],
+            "scannedAt": "2026-09-07T08:00:00Z",
+        },
+        "install_command": "skillhub install aws-lambda-helper",
+        "downloads": 10200,
+        "stars": 311,
+        "content": """// AWS Lambda Helper
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+function generateHandler(runtime, config) {
+  if (runtime === 'nodejs20.x') {
+    return `exports.handler = async (event) => {
+  const body = JSON.parse(event.body || '{}');
+  // Business logic here
+  return { statusCode: 200, body: JSON.stringify({ message: 'OK', data: body }) };
+};`;
+  }
+  if (runtime === 'python3.12') {
+    return `import json
+def handler(event, context):
+    body = json.loads(event.get('body', '{}'))
+    return {'statusCode': 200, 'body': json.dumps({'message': 'OK', 'data': body})}`;
+  }
+}
+
+function packageAndDeploy(functionName, runtime, handlerCode) {
+  const dir = `/tmp/lambda-${functionName}`;
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'index.js'), handlerCode);
+  execSync(`cd ${dir} && zip -r ../deploy.zip .`);
+  execSync(`aws lambda update-function-code --function-name ${functionName} --zip-file fileb://deploy.zip`);
+  return { deployed: true, functionName };
+}
+
+module.exports = { generateHandler, packageAndDeploy };""",
+    },
+    {
+        "slug": "gcp-deploy-assistant",
+        "name": "GCP Deploy Assistant",
+        "author": "cloud-ninja",
+        "description": "辅助部署应用到 Google Cloud Platform，支持 Cloud Run、App Engine 和 GKE 部署策略。",
+        "tags": ["GCP", "cloud", "deployment", "serverless"],
+        "capabilities": ["file_read", "file_write", "process_exec"],
+        "risk_level": "medium",
+        "security_score": 59,
+        "security_report": {
+            "level": "medium",
+            "score": 59,
+            "findings": [
+                {
+                    "id": "f47",
+                    "severity": "medium",
+                    "title": "执行 gcloud 部署命令",
+                    "description": "通过 child_process 执行 gcloud 命令进行部署。需要 GCP 认证凭证。",
+                    "evidence": "execSync(`gcloud run deploy ${service} --image ${image}`)",
+                    "recommendation": "使用服务账号密钥而非用户凭证。限制 gcloud 命令的权限范围。",
+                }
+            ],
+            "scannedAt": "2026-09-07T09:00:00Z",
+        },
+        "install_command": "skillhub install gcp-deploy-assistant",
+        "downloads": 6500,
+        "stars": 198,
+        "content": """// GCP Deploy Assistant
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function deployToCloudRun(config) {
+  const { service, image, region = 'us-central1', port = 8080 } = config;
+  execSync(
+    `gcloud run deploy ${service} --image ${image} --region ${region} --port ${port} --allow-unauthenticated`
+  );
+  return { deployed: true, url: `https://${service}-${region}.a.run.app` };
+}
+
+function generateDockerfile(appType) {
+  const templates = {
+    node: `FROM node:20-slim
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
+EXPOSE 8080
+CMD ["node", "server.js"]`,
+    python: `FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8080
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:8080"]`,
+  };
+  return templates[appType] || templates.node;
+}
+
+module.exports = { deployToCloudRun, generateDockerfile };""",
+    },
+    {
+        "slug": "azure-devops-helper",
+        "name": "Azure DevOps Helper",
+        "author": "cloud-ninja",
+        "description": "辅助 Azure 云服务部署和管理，支持 ARM 模板生成、Azure Functions 部署和 Pipeline 配置。",
+        "tags": ["Azure", "cloud", "devops", "deployment"],
+        "capabilities": ["file_read", "file_write", "process_exec", "llm_call"],
+        "risk_level": "medium",
+        "security_score": 62,
+        "security_report": {
+            "level": "medium",
+            "score": 62,
+            "findings": [
+                {
+                    "id": "f48",
+                    "severity": "medium",
+                    "title": "执行 az CLI 命令",
+                    "description": "通过 Azure CLI 执行部署和管理操作，需要 Azure 订阅凭证。",
+                    "recommendation": "使用托管身份或服务主体。不要在代码中硬编码凭证。",
+                }
+            ],
+            "scannedAt": "2026-09-07T10:00:00Z",
+        },
+        "install_command": "skillhub install azure-devops-helper",
+        "downloads": 5800,
+        "stars": 175,
+        "content": """// Azure DevOps Helper
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function generateArmTemplate(config) {
+  return {
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    contentVersion: "1.0.0.0",
+    parameters: {
+      appName: { type: "string", metadata: { description: "Name of the web app" } },
+      location: { type: "string", defaultValue: "[resourceGroup().location]" },
+    },
+    resources: [
+      {
+        type: "Microsoft.Web/sites",
+        apiVersion: "2023-01-01",
+        name: "[parameters('appName')]",
+        location: "[parameters('location')]",
+        kind: "app",
+        properties: {
+          serverFarmId: "[resourceId('Microsoft.Web/serverfarms', parameters('appName'))]",
+          siteConfig: { alwaysOn: true, http20Enabled: true },
+        },
+      },
+    ],
+  };
+}
+
+function deployFunction(functionName, codeDir) {
+  execSync(`az functionapp deployment source config-zip --name ${functionName} --src ${codeDir}/deploy.zip`);
+  return { deployed: true, functionName };
+}
+
+module.exports = { generateArmTemplate, deployFunction };""",
+    },
 ]
 
 
