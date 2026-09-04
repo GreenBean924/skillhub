@@ -15,7 +15,7 @@ sys.path.insert(0, "backend")
 
 from app.core.database import async_session_factory
 from app.models.skill import Skill
-from app.services.security.llm_reviewer import review_skill
+from app.services.security.audit_pipeline import review_skill
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
