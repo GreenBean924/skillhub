@@ -53,3 +53,12 @@ export async function getTags(): Promise<TagResponse[]> {
 export async function getStats(): Promise<StatsResponse> {
   return fetchAPI<StatsResponse>("/stats");
 }
+
+export async function getRecommendations(limit = 6): Promise<Skill[]> {
+  const res = await fetchAPI<{ data: Skill[] }>(`/recommendations?limit=${limit}`);
+  return res.data;
+}
+
+export async function getSkillsByTag(tag: string, page = 1, pageSize = 20): Promise<SearchResponse> {
+  return fetchAPI<SearchResponse>(`/skills/search?q=${encodeURIComponent(tag)}&page=${page}&page_size=${pageSize}`);
+}

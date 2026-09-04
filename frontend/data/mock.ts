@@ -1,5 +1,5 @@
 export type Severity = "critical" | "high" | "medium" | "low" | "info";
-export type SecurityLevel = "safe" | "low" | "medium" | "high";
+export type SecurityLevel = "safe" | "low" | "medium" | "high" | "critical" | "pending";
 
 export interface Finding {
   id: string;

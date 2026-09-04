@@ -1,4 +1,4 @@
-import { getSkills, getTags } from "@/lib/api";
+import { getSkills, getTags, getRecommendations } from "@/lib/api";
 import { SearchBar } from "@/components/SearchBar";
 import { SkillCard } from "@/components/SkillCard";
 import { TagChip } from "@/components/TagChip";
@@ -8,9 +8,18 @@ export default async function Home() {
   const allSkills = skillsRes.data;
   const popularTags = tags.slice(0, 10).map((t) => t.name);
 
-  const recommended = [...allSkills]
+  let recommended = allSkills
     .sort((a, b) => b.stars - a.stars)
     .slice(0, 6);
+
+  try {
+    const apiRecs = await getRecommendations(6);
+    if (apiRecs.length > 0) {
+      recommended = apiRecs;
+    }
+  } catch {
+    // fallback to stars-based sorting
+  }
 
   const latest = [...allSkills]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -34,7 +43,7 @@ export default async function Home() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono text-muted mr-1">热门标签:</span>
             {popularTags.slice(0, 8).map((tag) => (
-              <TagChip key={tag} tag={tag} />
+              <TagChip key={tag} tag={tag} href={`/tags/${tag}`} />
             ))}
           </div>
         </section>

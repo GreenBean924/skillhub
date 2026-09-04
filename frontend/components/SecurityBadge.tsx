@@ -32,6 +32,20 @@ const levelConfig: Record<
     border: "border-neon-red/30",
     dot: "bg-neon-red",
   },
+  critical: {
+    label: "极高风险",
+    color: "text-red-400",
+    bg: "bg-red-400/10",
+    border: "border-red-400/30",
+    dot: "bg-red-400",
+  },
+  pending: {
+    label: "待审查",
+    color: "text-zinc-400",
+    bg: "bg-zinc-400/10",
+    border: "border-zinc-400/30",
+    dot: "bg-zinc-400",
+  },
 };
 
 export function SecurityBadge({
