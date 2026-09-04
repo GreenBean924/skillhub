@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "qwen-plus"
     CORS_ORIGINS: str = "http://localhost:3000"
     ENVIRONMENT: str = "development"
+    EMBEDDING_MODEL: str = "text-embedding-v3"
+    EMBEDDING_DIMENSIONS: int = 1536
 
     @property
     def cors_origins_list(self) -> list[str]:
