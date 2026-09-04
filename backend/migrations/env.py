@@ -1,11 +1,17 @@
+import os
+import sys
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.core.config import get_settings
-from app.core.database import Base
-from app.models.skill import Skill  # noqa: F401 - ensure models are imported
+# alembic 的命令行脚本不会把工作目录加入 sys.path，这里根据 env.py 自身位置
+# 推导出 backend 根目录（migrations 的父目录），保证不依赖 PYTHONPATH/CWD 也能 import app。
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.core.config import get_settings  # noqa: E402
+from app.core.database import Base  # noqa: E402
+from app.models.skill import Skill  # noqa: F401,E402 - ensure models are imported
 
 config = context.config
 
