@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -20,6 +21,7 @@ test_session_factory = sessionmaker(test_engine, class_=AsyncSession, expire_on_
 @pytest_asyncio.fixture(scope="session")
 async def setup_test_db():
     async with test_engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with test_engine.begin() as conn:
@@ -57,7 +59,7 @@ async def seed_skill(db_session: AsyncSession) -> Skill:
         author="Test Author",
         tags=["python", "testing"],
         capabilities=["file_read", "code_exec"],
-        security_level="safe",
+        risk_level="safe",
         security_score=95,
         security_report={
             "findings": [
@@ -92,7 +94,7 @@ async def seed_skills(db_session: AsyncSession) -> list[Skill]:
             "author": "Author A",
             "tags": ["python", "ai"],
             "capabilities": ["llm_call"],
-            "security_level": "safe",
+            "risk_level": "safe",
             "security_score": 90,
             "security_report": {},
             "install_command": "skillhub install alpha-skill",
@@ -106,7 +108,7 @@ async def seed_skills(db_session: AsyncSession) -> list[Skill]:
             "author": "Author B",
             "tags": ["security", "audit"],
             "capabilities": ["network_access"],
-            "security_level": "medium",
+            "risk_level": "medium",
             "security_score": 60,
             "security_report": {},
             "install_command": "skillhub install beta-skill",
@@ -120,7 +122,7 @@ async def seed_skills(db_session: AsyncSession) -> list[Skill]:
             "author": "Author A",
             "tags": ["python", "testing"],
             "capabilities": ["file_read"],
-            "security_level": "safe",
+            "risk_level": "safe",
             "security_score": 88,
             "security_report": {},
             "install_command": "skillhub install gamma-skill",

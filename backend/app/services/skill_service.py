@@ -89,7 +89,7 @@ async def get_stats(db: AsyncSession) -> dict:
     count_result = await db.execute(count_query)
     total_skills = count_result.scalar() or 0
 
-    safe_query = select(func.count(Skill.id)).where(Skill.security_level == "safe")
+    safe_query = select(func.count(Skill.id)).where(Skill.risk_level == "safe")
     safe_result = await db.execute(safe_query)
     safe_skills = safe_result.scalar() or 0
 

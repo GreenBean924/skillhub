@@ -35,7 +35,7 @@ def skill_to_response(skill: Skill) -> SkillResponse:
         tags=skill.tags or [],
         capabilities=skill.capabilities or [],
         security=SecurityReportResponse(
-            level=skill.security_level,
+            level=skill.risk_level,
             score=skill.security_score,
             findings=[
                 FindingResponse(
@@ -50,9 +50,11 @@ def skill_to_response(skill: Skill) -> SkillResponse:
             ],
             scannedAt=security_report.get("scannedAt", skill.updated_at.isoformat()),
         ),
-        installCommand=skill.install_command,
+        installCommand=skill.install_command or "",
         downloads=skill.downloads,
         stars=skill.stars,
+        installCount=skill.install_count,
+        version=skill.version,
         createdAt=skill.created_at.isoformat(),
         updatedAt=skill.updated_at.isoformat(),
         content=skill.content,

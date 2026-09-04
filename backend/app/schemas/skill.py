@@ -31,6 +31,8 @@ class SkillResponse(BaseModel):
     installCommand: str
     downloads: int
     stars: int
+    installCount: int = 0
+    version: str | None = None
     createdAt: str
     updatedAt: str
     content: str | None = None

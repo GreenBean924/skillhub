@@ -44,7 +44,7 @@ async def run_review():
                 content=skill.content or "",
             )
 
-            skill.security_level = report["risk_level"]
+            skill.risk_level = report["risk_level"]
             skill.security_score = report["score"]
             skill.security_report = report
 
