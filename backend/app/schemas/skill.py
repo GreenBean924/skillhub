@@ -36,6 +36,7 @@ class SkillResponse(BaseModel):
     createdAt: str
     updatedAt: str
     content: str | None = None
+    rankingScore: float | None = None
 
     model_config = {"from_attributes": True}
 
@@ -76,3 +77,7 @@ class SearchResponse(BaseModel):
     query_understanding: QueryUnderstandingResponse
     data: list[SkillResponse]
     meta: MetaResponse
+
+
+class RecommendationResponse(BaseModel):
+    data: list[SkillResponse]

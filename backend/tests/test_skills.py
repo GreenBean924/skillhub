@@ -105,14 +105,16 @@ class TestSearchSkills:
         resp = await client.get("/api/v1/skills/search?q=Alpha")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["meta"]["total"] == 1
-        assert body["data"][0]["slug"] == "alpha-skill"
+        assert body["meta"]["total"] >= 1
+        slugs = [s["slug"] for s in body["data"]]
+        assert "alpha-skill" in slugs
 
     async def test_search_by_description(self, client: AsyncClient, seed_skills):
         resp = await client.get("/api/v1/skills/search?q=medium+risk")
         body = resp.json()
-        assert body["meta"]["total"] == 1
-        assert body["data"][0]["slug"] == "beta-skill"
+        assert body["meta"]["total"] >= 1
+        slugs = [s["slug"] for s in body["data"]]
+        assert "beta-skill" in slugs
 
     async def test_search_no_results(self, client: AsyncClient, seed_skills):
         resp = await client.get("/api/v1/skills/search?q=nonexistent")

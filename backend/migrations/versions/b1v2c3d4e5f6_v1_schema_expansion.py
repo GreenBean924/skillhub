@@ -48,7 +48,7 @@ def upgrade() -> None:
     op.add_column("skills", sa.Column("trending_score", sa.Float(), nullable=False, server_default="0"))
     op.add_column("skills", sa.Column("reviewed_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column("skills", sa.Column("review_version", sa.String(50), nullable=True))
-    op.add_column("skills", sa.Column("embedding", Vector(1536), nullable=True))
+    op.add_column("skills", sa.Column("embedding", Vector(1024), nullable=True))
 
     op.execute("CREATE INDEX ix_skills_embedding ON skills USING hnsw (embedding vector_cosine_ops)")
 

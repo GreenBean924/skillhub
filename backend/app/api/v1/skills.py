@@ -10,6 +10,7 @@ from app.schemas.skill import (
     FindingResponse,
     MetaResponse,
     QueryUnderstandingResponse,
+    RecommendationResponse,
     SearchResponse,
     SecurityReportResponse,
     SkillListResponse,
@@ -19,6 +20,10 @@ from app.schemas.skill import (
     TagResponse,
 )
 from app.services import skill_service
+from app.services.discovery.query_understanding import understand_query
+from app.services.discovery.search import hybrid_search
+from app.services.discovery.ranking import rank_skills
+from app.services.recommendation.daily import get_daily_recommendations
 
 router = APIRouter(prefix="/api/v1", tags=["skills"])
 
@@ -83,11 +88,31 @@ async def search_skills(
     page_size: int = Query(20, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
 ):
-    skills, total = await skill_service.search_skills(db, q, page, page_size)
+    qu = await understand_query(q)
+    results, total = await hybrid_search(db, q, qu, page, page_size)
+    results = rank_skills(results)
+
+    response_items = []
+    for item in results:
+        resp = skill_to_response(item["skill"])
+        resp.rankingScore = item.get("ranking_score")
+        response_items.append(resp)
+
     return SearchResponse(
-        query_understanding=QueryUnderstandingResponse(tags=[], capabilities=[]),
-        data=[skill_to_response(s) for s in skills],
+        query_understanding=QueryUnderstandingResponse(tags=qu.tags, capabilities=qu.capabilities),
+        data=response_items,
         meta=MetaResponse(page=page, page_size=page_size, total=total),
+    )
+
+
+@router.get("/recommendations", response_model=RecommendationResponse)
+async def recommendations(
+    limit: int = Query(10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+):
+    recs = await get_daily_recommendations(db, limit)
+    return RecommendationResponse(
+        data=[skill_to_response(item["skill"]) for item in recs],
     )
 
 

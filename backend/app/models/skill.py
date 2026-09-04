@@ -46,7 +46,7 @@ class Skill(Base):
     trending_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     content: Mapped[str | None] = mapped_column(Text, nullable=True)
     skill_md: Mapped[str | None] = mapped_column(Text, nullable=True)
-    embedding = mapped_column(Vector(1536), nullable=True)
+    embedding = mapped_column(Vector(1024), nullable=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     review_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
