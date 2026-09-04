@@ -81,3 +81,13 @@ class SearchResponse(BaseModel):
 
 class RecommendationResponse(BaseModel):
     data: list[SkillResponse]
+
+
+class InstallResponse(BaseModel):
+    slug: str
+    skill_md: str | None
+    install_command: str
+    risk_level: str
+    security_score: int
+    agent_type: str = "claude_code"
+    message: str

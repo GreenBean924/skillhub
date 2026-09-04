@@ -1,0 +1,21 @@
+[project]
+name = "skillhub-cli"
+version = "0.1.0"
+description = "SkillHub CLI — discover, audit, and install AI Agent Skills"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.12.5",
+    "rich>=13.9.2",
+    "httpx>=0.27.0",
+]
+
+[project.scripts]
+skillhub = "skillhub_cli.main:app"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

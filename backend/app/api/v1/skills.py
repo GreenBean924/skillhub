@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.models.skill import Skill
 from app.schemas.skill import (
     FindingResponse,
+    InstallResponse,
     MetaResponse,
     QueryUnderstandingResponse,
     RecommendationResponse,
@@ -24,6 +25,7 @@ from app.services.discovery.query_understanding import understand_query
 from app.services.discovery.search import hybrid_search
 from app.services.discovery.ranking import rank_skills
 from app.services.recommendation.daily import get_daily_recommendations
+from app.models.install_log import InstallLog
 
 router = APIRouter(prefix="/api/v1", tags=["skills"])
 
@@ -113,6 +115,27 @@ async def recommendations(
     recs = await get_daily_recommendations(db, limit)
     return RecommendationResponse(
         data=[skill_to_response(item["skill"]) for item in recs],
+    )
+
+
+@router.get("/skills/{slug}/install", response_model=InstallResponse)
+async def install_skill(slug: str, db: AsyncSession = Depends(get_db)):
+    skill = await skill_service.get_skill_by_slug(db, slug)
+    if not skill:
+        raise HTTPException(status_code=404, detail="Skill not found")
+
+    log = InstallLog(skill_id=skill.id, source="api")
+    db.add(log)
+    skill.install_count = (skill.install_count or 0) + 1
+    await db.commit()
+
+    return InstallResponse(
+        slug=skill.slug,
+        skill_md=skill.skill_md,
+        install_command=skill.install_command or f"skillhub install {skill.slug}",
+        risk_level=skill.risk_level,
+        security_score=skill.security_score,
+        message=f"Installation data for '{skill.name}'",
     )
 
 
