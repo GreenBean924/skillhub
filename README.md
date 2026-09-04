@@ -99,18 +99,27 @@ SkillHub/
 
 ## API 接口
 
-所有接口以 `/api/v1/` 为前缀。
+### 业务接口（前缀 `/api/v1`）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/skills` | Skill 列表（分页） |
 | GET | `/skills/search` | 混合搜索 |
 | GET | `/skills/{slug}` | Skill 详情 |
-| GET | `/skills/{slug}/install` | 获取安装信息 |
+| GET | `/skills/{slug}/install` | 获取安装信息（安装计数原子自增） |
 | GET | `/tags` | 标签列表 |
 | GET | `/stats` | 平台统计 |
 | GET | `/recommendations` | 每日推荐 |
-| POST | `/ingest/skills-sh` | 触发 skills.sh 数据聚合（管理接口） |
+
+### 管理接口
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/admin/ingest/skills-sh` | 触发 skills.sh 数据聚合（后台异步执行） |
+
+> 管理接口需鉴权：请求头携带 `X-Admin-Key: <ADMIN_API_KEY>`。生产环境未配置 `ADMIN_API_KEY` 时一律拒绝（fail closed）。
+>
+> 注：管理接口当前挂在 `/admin` 前缀下，尚未统一到 `/api/v1`。
 
 ---
 
@@ -128,6 +137,7 @@ SkillHub/
 DATABASE_URL=postgresql+asyncpg://...
 LLM_API_KEY=sk-...            # DashScope (通义千问)
 CORS_ORIGINS=http://localhost:3000
+ADMIN_API_KEY=...             # 管理接口鉴权密钥，生产环境必填
 ENVIRONMENT=development
 ```
 
@@ -181,7 +191,7 @@ cd cli && pytest
 cd frontend && npm test
 ```
 
-当前 **167 个测试全部通过**（138 后端 + 13 CLI + 16 前端）。
+当前 **174 个测试全部通过**（145 后端 + 13 CLI + 16 前端）。
 
 ---
 
@@ -198,6 +208,14 @@ cd frontend && npm test
 | Phase 5 | 安装系统 + AgentAdapter + CLI | ✅ |
 | Phase 6 | 前端增强（标签浏览 / 推荐 / Vitest 测试） | ✅ |
 | 部署 | Railway（后端） + Vercel（前端） + Docker | ✅ |
+| 安全加固 | 安全与正确性红线修复（SQL 注入 / 鉴权 / 原子性 / 异常处理） | ✅ |
+
+**安全加固明细**：
+- 删除含 SQL 拼接注入风险的死代码 `search_skills`
+- 管理接口新增 `X-Admin-Key` 鉴权（生产环境 fail closed）
+- 后台聚合任务改用独立数据库 session，修复复用请求级 session 必然报错的 bug
+- 安装计数改为 SQL 原子自增，避免并发丢更新
+- 新增全局异常处理器，统一返回 `{error:{code,message}}`，不再裸 500 或泄露堆栈
 
 后续将进入 **V2 迭代**。
 
