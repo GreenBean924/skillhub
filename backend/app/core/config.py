@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     LLM_API_BASE: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     LLM_MODEL: str = "qwen-plus"
     CORS_ORIGINS: str = "http://localhost:3000"
+    ADMIN_API_KEY: str = ""
     ENVIRONMENT: str = "development"
     EMBEDDING_MODEL: str = "text-embedding-v3"
     EMBEDDING_DIMENSIONS: int = 1024
